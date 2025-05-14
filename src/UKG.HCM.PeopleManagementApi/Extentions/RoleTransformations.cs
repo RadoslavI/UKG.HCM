@@ -1,5 +1,5 @@
+using UKG.HCM.PeopleManagementApi.Data.Entities;
 using UKG.HCM.PeopleManagementApi.DTOs.Person;
-using UKG.HCM.PeopleManagementApi.Models;
 
 namespace UKG.HCM.PeopleManagementApi.Extentions;
 

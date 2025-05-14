@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UKG.HCM.PeopleManagementApi.Models;
+using UKG.HCM.PeopleManagementApi.Data.Entities;
 
 namespace UKG.HCM.PeopleManagementApi.Data;
 

@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using UKG.HCM.PeopleManagementApi.Data;
+using UKG.HCM.PeopleManagementApi.Data.Entities;
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Create;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Get;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 using UKG.HCM.PeopleManagementApi.Extentions;
-using UKG.HCM.PeopleManagementApi.Models;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 namespace UKG.HCM.PeopleManagementApi.Services;

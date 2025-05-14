@@ -1,4 +1,4 @@
-namespace UKG.HCM.PeopleManagementApi.Models;
+namespace UKG.HCM.PeopleManagementApi.Constants;
 
 public static class ApplicationRoles
 {

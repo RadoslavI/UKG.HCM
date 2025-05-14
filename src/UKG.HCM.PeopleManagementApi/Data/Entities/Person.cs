@@ -1,4 +1,4 @@
-namespace UKG.HCM.PeopleManagementApi.Models;
+namespace UKG.HCM.PeopleManagementApi.Data.Entities;
 
 public class Person
 {
