@@ -1,0 +1,65 @@
+## Rider-specific
+.idea/
+*.sln.iml
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# DotCover
+.idea/.idea.DotSettings
+.idea/.dotCover
+
+## ASP.NET
+appsettings.*.json
+appsettings.local.json
+appsettings.Development.json
+appsettings.Production.json
+.env
+
+## Rider caches
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/dataSources/
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/httpRequests/
+
+## Others
+*.dbmdl
+*.bak
+*.vssscc
+*.vspscc
+*.ncrunchproject
+*.ncrunchsolution
+*.localhistory/
+*.vs/
+*.tgz
+*.vscode/
+_ReSharper*/
+**/packages/*
+*.nupkg
+*.snupkg

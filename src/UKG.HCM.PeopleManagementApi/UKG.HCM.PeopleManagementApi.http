@@ -1,0 +1,6 @@
+@UKG.HCM.PeopleManagementApi_HostAddress = http://localhost:5214
+
+GET {{UKG.HCM.PeopleManagementApi_HostAddress}}/api/People/
+Accept: application/json
+
+###

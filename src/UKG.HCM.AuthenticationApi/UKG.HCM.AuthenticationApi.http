@@ -1,0 +1,6 @@
+@UKG.HCM.AuthenticationApi_HostAddress = http://localhost:5226
+
+GET {{UKG.HCM.AuthenticationApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

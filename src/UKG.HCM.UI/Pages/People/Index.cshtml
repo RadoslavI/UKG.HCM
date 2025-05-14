@@ -1,0 +1,27 @@
+@page
+@model UKG.HCM.UI.Pages.People.IndexModel
+
+<h2>People List</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var person in Model.People)
+    {
+        <tr>
+            <td>@person.Name</td>
+            <td>@person.Role</td>
+            <td>
+                <a href="#">View</a> |
+                <a href="#">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
