@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
 using UKG.HCM.AuthenticationApi.DTOs.LoginUser;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
 
@@ -16,6 +17,16 @@ public class AuthController(IUserService userService, ITokenService tokenService
             return Unauthorized("Invalid username or password");
 
         var token = tokenService.GenerateToken(user);
-        return Ok(new { token });
+        return Ok(new OutgoingLoginUserDto(token));
+    }
+    
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] IncomingCreateUserDto dto)
+    {
+        var created = await userService.CreateUserAsync(dto);
+        if (!created)
+            return Conflict($"User with email {dto.Email} already exists.");
+
+        return Ok();
     }
 }

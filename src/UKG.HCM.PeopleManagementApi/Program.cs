@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UKG.HCM.PeopleManagementApi.Data;
+using UKG.HCM.PeopleManagementApi.Services;
+using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 namespace UKG.HCM.PeopleManagementApi;
 
@@ -18,6 +20,8 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
+        builder.Services.AddScoped<IPeopleService, PeopleService>();
+        builder.Services.AddHttpClient<IAuthService, AuthService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -46,6 +50,9 @@ public class Program
         builder.Services.AddControllers();
         
         var key = builder.Configuration["JWT:Key"];
+        var issuer =  builder.Configuration["JWT:Issuer"];
+        var audience = builder.Configuration["JWT:Audience"];
+        
         Console.WriteLine("JWT Key: " + key);
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -57,8 +64,8 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "AuthenticationApi",
-                    ValidAudience = "PeopleManagementApi",
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
                 };
             });

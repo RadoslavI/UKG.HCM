@@ -19,7 +19,7 @@ public class TokenService(IConfiguration configuration) : ITokenService
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Name, user.FullName),
             new Claim(ClaimTypes.Role, user.Role),
         };
 

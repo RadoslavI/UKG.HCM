@@ -1,85 +1,57 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UKG.HCM.PeopleManagementApi.Data;
+using UKG.HCM.PeopleManagementApi.DTOs.Person.Create;
+using UKG.HCM.PeopleManagementApi.DTOs.Person.Get;
+using UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 using UKG.HCM.PeopleManagementApi.Models;
+using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 namespace UKG.HCM.PeopleManagementApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PeopleController : ControllerBase
+public class PeopleController(IPeopleService peopleService) : ControllerBase
 {
-    private readonly PeopleContext _context;
-
-    public PeopleController(PeopleContext context)
-    {
-        _context = context;
-    }
-
-    // GET: api/people
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<Person>>> GetPeople()
+    public async Task<ActionResult<IEnumerable<OutgoingGetPersonDTO>>> GetPeople()
     {
-        return await _context.People.ToListAsync();
+        var people = await peopleService.GetPeopleAsync();
+        return Ok(people);
     }
 
-    // GET: api/people/{id}
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<Person>> GetPerson(Guid id)
+    public async Task<ActionResult<OutgoingGetPersonDTO>> GetPerson(Guid id)
     {
-        var person = await _context.People.FindAsync(id);
-        if (person == null)
+        var person = await peopleService.GetPersonByIdAsync(id);
+        if (person is null)
             return NotFound();
 
-        return person;
+        return Ok(person);
     }
 
-    // POST: api/people
     [HttpPost]
-    [Authorize(Roles = "HRAdmin,Manager")]
-    public async Task<ActionResult<Person>> CreatePerson(Person person)
+    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}, {ApplicationRoles.Manager}")]
+    public async Task<ActionResult<Guid>> CreatePerson(IncomingCreatePersonDTO incoming)
     {
-        _context.People.Add(person);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
+        var createdId = await peopleService.CreatePersonAsync(incoming);
+        return CreatedAtAction(nameof(CreatePerson), new { id = createdId });
     }
 
-    // PUT: api/people/{id}
-    [HttpPut("{id}")]
-    [Authorize(Roles = "HRAdmin,Manager")]
-    public async Task<IActionResult> UpdatePerson(Guid id, Person updatedPerson)
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}, {ApplicationRoles.Manager}")]
+    public async Task<IActionResult> UpdatePerson(Guid id, IncomingUpdatePersonDTO incoming)
     {
-        if (id != updatedPerson.Id)
-            return BadRequest();
-
-        var person = await _context.People.FindAsync(id);
-        if (person == null)
-            return NotFound();
-
-        person.FirstName = updatedPerson.FirstName;
-        person.LastName = updatedPerson.LastName;
-        person.Email = updatedPerson.Email;
-        person.Role = updatedPerson.Role;
-
-        await _context.SaveChangesAsync();
-        return NoContent();
+        var updated = await peopleService.UpdatePersonAsync(id, incoming);
+        return updated ? NoContent() : NotFound();
     }
 
-    // DELETE: api/people/{id}
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "HRAdmin")]
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}")]
     public async Task<IActionResult> DeletePerson(Guid id)
     {
-        var person = await _context.People.FindAsync(id);
-        if (person == null)
-            return NotFound();
-
-        _context.People.Remove(person);
-        await _context.SaveChangesAsync();
-        return NoContent();
+        var deleted = await peopleService.DeletePersonAsync(id);
+        return deleted ? NoContent() : NotFound();
     }
 }
