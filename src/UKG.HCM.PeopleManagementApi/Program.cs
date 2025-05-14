@@ -1,9 +1,11 @@
 using System.Text;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UKG.HCM.PeopleManagementApi.Data;
+using FluentValidation.AspNetCore;
 using UKG.HCM.PeopleManagementApi.Services;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
@@ -48,6 +50,9 @@ public class Program
             });
         });
         builder.Services.AddControllers();
+        builder.Services.AddFluentValidationAutoValidation();
+        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
         
         var key = builder.Configuration["JWT:Key"];
         var issuer =  builder.Configuration["JWT:Issuer"];
