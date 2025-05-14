@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using UKG.HCM.PeopleManagementApi.Configuration;
 using UKG.HCM.PeopleManagementApi.Data;
 using FluentValidation.AspNetCore;
 using UKG.HCM.PeopleManagementApi.Services;
@@ -11,54 +12,83 @@ using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 namespace UKG.HCM.PeopleManagementApi;
 
+/// <summary>
+/// Application entry point and configuration
+/// </summary>
 public class Program
 {
+    private const string BearerSecurityScheme = "Bearer";
+    private const string PeopleDbName = "PeopleDb";
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
-        builder.Services.AddDbContext<PeopleContext>(options =>
-            options.UseInMemoryDatabase("PeopleDb"));
 
-        // Add services to the container.
+        ConfigureServices(builder);
+        ConfigureAuthentication(builder);
+
+        var app = builder.Build();
+        ConfigureMiddleware(app);
+        SeedDatabase(app);
+
+        app.Run();
+    }
+
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddDbContext<PeopleContext>(options =>
+            options.UseInMemoryDatabase(PeopleDbName));
+
+        // Core services
         builder.Services.AddAuthorization();
+        builder.Services.AddControllers();
+
+        // Application services
         builder.Services.AddScoped<IPeopleService, PeopleService>();
         builder.Services.AddHttpClient<IAuthService, AuthService>();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        // Validation
+        builder.Services.AddFluentValidationAutoValidation();
+        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+        // API Documentation
+        ConfigureSwagger(builder);
+    }
+
+    private static void ConfigureSwagger(WebApplicationBuilder builder)
+    {
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            c.AddSecurityDefinition(BearerSecurityScheme, new OpenApiSecurityScheme
             {
                 In = ParameterLocation.Header,
                 Description = "Enter JWT token",
                 Name = "Authorization",
                 Type = SecuritySchemeType.ApiKey,
                 BearerFormat = "JWT",
-                Scheme = "Bearer"
+                Scheme = BearerSecurityScheme
             });
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
                     new OpenApiSecurityScheme
                     {
-                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = BearerSecurityScheme
+                        }
                     },
-                    []
+                    Array.Empty<string>()
                 }
             });
         });
-        builder.Services.AddControllers();
-        builder.Services.AddFluentValidationAutoValidation();
-        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+    }
 
-        
-        var key = builder.Configuration["JWT:Key"];
-        var issuer =  builder.Configuration["JWT:Issuer"];
-        var audience = builder.Configuration["JWT:Audience"];
-        
-        Console.WriteLine("JWT Key: " + key);
+    private static void ConfigureAuthentication(WebApplicationBuilder builder)
+    {
+        var jwtConfig = builder.Configuration.GetSection("JWT").Get<JwtConfig>();
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -69,15 +99,16 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                    ValidIssuer = jwtConfig.Issuer,
+                    ValidAudience = jwtConfig.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtConfig.Key))
                 };
             });
+    }
 
-        var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
+    private static void ConfigureMiddleware(WebApplication app)
+    {
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -85,17 +116,15 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<PeopleContext>();
-            DbSeeder.Seed(db);
-        }
+    }
 
-        app.Run();
+    private static void SeedDatabase(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<PeopleContext>();
+        DbSeeder.Seed(db);
     }
 }
