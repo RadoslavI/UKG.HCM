@@ -1,57 +1,65 @@
-using System.Security.Cryptography;
-using System.Text;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using UKG.HCM.AuthenticationApi.Data;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
 using UKG.HCM.AuthenticationApi.Models;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
+using UKG.HCM.AuthenticationApi.Utilities;
 
 namespace UKG.HCM.AuthenticationApi.Services;
 
 public class UserService : IUserService
 {
-    private readonly List<User> _users =
-    [
-        new() { Id = Guid.NewGuid(), FullName = "employee1", PasswordHash = "1234", Role = "Employee" },
-        new() { Id = Guid.NewGuid(), FullName = "manager1", PasswordHash = "1234", Role = "Manager" },
-        new() { Id = Guid.NewGuid(), FullName = "admin1", PasswordHash = "1234", Role = "HRAdmin" }
-    ];
-
-    public User? ValidateUser(string username, string password)
+    private readonly AuthContext _context;
+    
+    public UserService(AuthContext context)
     {
-        return _users.FirstOrDefault(u =>
-            u.FullName.Equals(username, StringComparison.OrdinalIgnoreCase) &&
-            u.PasswordHash == password);
+        _context = context;
     }
 
-    public Task<bool> CreateUserAsync(IncomingCreateUserDto dto)
+    public async Task<User?> ValidateUserAsync(string username, string password)
     {
-        if (_users.Any(u => u.Email == dto.Email))
-            return Task.FromResult(false); // Already exists
+        var passwordHash = PasswordHasher.HashPassword(password);
+        
+        // Allow login with either fullname or email
+        return await _context.Users.FirstOrDefaultAsync(u =>
+            (u.FullName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
+             u.Email.Equals(username, StringComparison.OrdinalIgnoreCase)) &&
+            u.PasswordHash == passwordHash);
+    }
 
-        var password = dto.Password ?? GenerateRandomPassword();
+    public async Task<bool> CreateUserAsync(IncomingCreateUserDto dto)
+    {
+        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            return false; // Already exists
+
+        var password = dto.Password ?? PasswordHasher.GenerateRandomPassword();
         var user = new User
         {
             Id = Guid.NewGuid(),
             Email = dto.Email,
             FullName = dto.FullName,
             Role = dto.Role,
-            PasswordHash = HashPassword(password)
+            PasswordHash = PasswordHasher.HashPassword(password)
         };
 
-        _users.Add(user);
-
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
+        
         // You could email the password here if needed
-        return Task.FromResult(true);
+        return true;
     }
-
-    private static string HashPassword(string password)
+    
+    public IEnumerable<Claim> GetUserClaims(User user)
     {
-        using var sha = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(password);
-        return Convert.ToBase64String(sha.ComputeHash(bytes));
-    }
-
-    private static string GenerateRandomPassword()
-    {
-        return Guid.NewGuid().ToString("N")[..8];
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+        
+        return claims;
     }
 }

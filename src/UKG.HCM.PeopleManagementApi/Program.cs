@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using UKG.HCM.PeopleManagementApi.Configuration;
 using UKG.HCM.PeopleManagementApi.Data;
 using FluentValidation.AspNetCore;
 using UKG.HCM.PeopleManagementApi.Services;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
+using UKG.HCM.Shared.Configuration;
+using UKG.HCM.Shared.Constants;
 
 namespace UKG.HCM.PeopleManagementApi;
 
@@ -39,8 +40,22 @@ public class Program
         builder.Services.AddDbContext<PeopleContext>(options =>
             options.UseInMemoryDatabase(PeopleDbName));
 
+        // Add configuration
+        builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JWT"));
+        
         // Core services
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy(PolicyNames.RequireHRAdmin, 
+                policy => policy.RequireRole(ApplicationRoles.HRAdmin));
+            
+            options.AddPolicy(PolicyNames.RequireManagerOrAbove, 
+                policy => policy.RequireRole(ApplicationRoles.HRAdmin, ApplicationRoles.Manager));
+            
+            options.AddPolicy(PolicyNames.RequireAuthenticatedUser,
+                policy => policy.RequireAuthenticatedUser());
+        });
+        
         builder.Services.AddControllers();
 
         // Application services
@@ -89,6 +104,10 @@ public class Program
     private static void ConfigureAuthentication(WebApplicationBuilder builder)
     {
         var jwtConfig = builder.Configuration.GetSection("JWT").Get<JwtConfig>();
+        if (jwtConfig?.Key == null)
+        {
+            throw new InvalidOperationException("JWT configuration is missing or invalid");
+        }
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

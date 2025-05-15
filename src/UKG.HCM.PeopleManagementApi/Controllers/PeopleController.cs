@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UKG.HCM.PeopleManagementApi.Constants;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Create;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Get;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
+using UKG.HCM.Shared.Constants;
 
 namespace UKG.HCM.PeopleManagementApi.Controllers;
 

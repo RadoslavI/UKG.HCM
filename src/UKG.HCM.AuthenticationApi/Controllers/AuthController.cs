@@ -10,9 +10,9 @@ namespace UKG.HCM.AuthenticationApi.Controllers;
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost("login")]
-    public IActionResult Login([FromBody] IncomingLoginUserDto login)
+    public async Task<IActionResult> Login([FromBody] IncomingLoginUserDto login)
     {
-        var user = userService.ValidateUser(login.Username, login.Password);
+        var user = await userService.ValidateUserAsync(login.Username, login.Password);
         if (user is null)
             return Unauthorized("Invalid username or password");
 

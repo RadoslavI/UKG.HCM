@@ -1,4 +1,4 @@
-using UKG.HCM.PeopleManagementApi.Constants;
+using UKG.HCM.Shared.Constants;
 
 namespace UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 
