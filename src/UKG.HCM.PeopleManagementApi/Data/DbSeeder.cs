@@ -9,9 +9,9 @@ public static class DbSeeder
         if (!context.People.Any())
         {
             context.People.AddRange(
-                new Person { FirstName = "John", LastName = "Doe", Email = "john.doe@company.com", Role = Role.Employee },
-                new Person { FirstName = "Jane", LastName = "Smith", Email = "jane.smith@company.com", Role = Role.Manager },
-                new Person { FirstName = "Tom", LastName = "Cruise", Email = "tom.cruise@company.com", Role = Role.HRAdmin }
+                new Person { FirstName = "John", LastName = "Employee", Email = "employee@ukg.com", Role = Role.Employee },
+                new Person { FirstName = "Jane", LastName = "Manager", Email = "manager@ukg.com", Role = Role.Manager },
+                new Person { FirstName = "Jerry", LastName = "Admin", Email = "admin@ukg.com", Role = Role.HRAdmin }
             );
             context.SaveChanges();
         }

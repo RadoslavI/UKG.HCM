@@ -6,10 +6,6 @@ namespace UKG.HCM.UI.JWT;
 public class JwtTokenStore
 {
     private string? _token;
-    
-    /// <summary>
-    /// Gets or sets the JWT token
-    /// </summary>
     public string? Token
     {
         get => _token;

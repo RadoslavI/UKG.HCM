@@ -28,7 +28,7 @@ public class PeopleService : IPeopleService
         var people = await _context.People.ToListAsync();
         
         _logger.LogInformation("People retrieved: {Count}", people.Count);
-        return people.Select(p => new OutgoingGetPersonDTO(p.Id, p.FirstName, p.LastName, p.Email, RoleTransformations.FromEnumToString(p.Role)));
+        return people.Select(p => new OutgoingGetPersonDTO(p.Id, p.FirstName, p.LastName, p.Email, RoleTransformations.FromEnumToString(p.Role), p.HireDate));
     }
 
     public async Task<OutgoingGetPersonDTO?> GetPersonByIdAsync(Guid id)
@@ -39,7 +39,7 @@ public class PeopleService : IPeopleService
             _logger.LogWarning("Person not found: {Id}", id);
             return null;
         }
-        return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumToString(person.Role));
+        return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumToString(person.Role), person.HireDate);
     }
 
     public async Task<Guid> CreatePersonAsync(IncomingCreatePersonDTO incoming)
@@ -49,7 +49,9 @@ public class PeopleService : IPeopleService
             FirstName = incoming.FirstName,
             LastName = incoming.LastName,
             Email = incoming.Email,
-            Role = RoleTransformations.FromStringToEnum(incoming.Role)
+            Role = RoleTransformations.FromStringToEnum(incoming.Role),
+            HireDate = incoming.HireDate,
+            CreatedAt = DateTime.Now
         };
         
         await _context.People.AddAsync(person);
@@ -96,8 +98,18 @@ public class PeopleService : IPeopleService
     {
         var person = await _context.People.FindAsync(id);
         if (person is null)
+        {
+            _logger.LogWarning("Delete failed: Person with ID {Id} not found", id);
             return false;
-
+        }
+        
+        var success = await _authService.DeleteUserAsync(person.Email);
+        if (!success)
+        {
+            _logger.LogWarning("Failed to delete user in Auth API for {Email}", person.Email);
+            return false;
+        }
+        
         _context.People.Remove(person);
         await _context.SaveChangesAsync();
         _logger.LogInformation("Person deleted: {FirstName} {LastName}", person.FirstName, person.LastName);

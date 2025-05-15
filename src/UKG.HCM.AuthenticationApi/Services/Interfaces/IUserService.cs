@@ -8,6 +8,6 @@ public interface IUserService
 {
     Task<User?> ValidateUserAsync(string username, string password);
     Task<bool> CreateUserAsync(IncomingCreateUserDto dto);
-    IEnumerable<Claim> GetUserClaims(User user);
     Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword);
+    Task<bool> DeleteUserAsync(string email);
 }

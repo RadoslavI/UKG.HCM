@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using UKG.HCM.AuthenticationApi.Data;
 using UKG.HCM.AuthenticationApi.Data.Entities;
@@ -11,17 +10,18 @@ namespace UKG.HCM.AuthenticationApi.Services;
 public class UserService : IUserService
 {
     private readonly AuthContext _context;
+    private readonly ILogger _logger;
     
-    public UserService(AuthContext context)
+    public UserService(AuthContext context, ILogger logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<User?> ValidateUserAsync(string username, string password)
     {
         var passwordHash = PasswordHasher.HashPassword(password);
         
-        // Allow login with either fullname or email
         return await _context.Users.FirstOrDefaultAsync(u =>
             u.Email.Equals(username, StringComparison.OrdinalIgnoreCase) &&
             u.PasswordHash == passwordHash);
@@ -45,8 +45,8 @@ public class UserService : IUserService
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
         
-        // Email to the user with the temp password to be sent here instead in production env
-        Console.WriteLine("Password for user {0}: {1}", user.Email, password);
+        // Email to the user with the temp password to be sent here instead if in production env
+        _logger.LogInformation("User {0} was created with password: {1}", user.Email, password);
         return true;
     }
     
@@ -54,25 +54,29 @@ public class UserService : IUserService
     {
         var user = await ValidateUserAsync(email, currentPassword);
         if (user is null)
+        {
+            _logger.LogWarning("User {0} not found or password is incorrect", email);
             return false;
+        }
     
         user.PasswordHash = PasswordHasher.HashPassword(newPassword);
         await _context.SaveChangesAsync();
     
+        _logger.LogInformation("Password for user {0} changed successfully", email);
+        
         return true;
     }
-
     
-    public IEnumerable<Claim> GetUserClaims(User user)
+    public async Task<bool> DeleteUserAsync(string email)
     {
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.FullName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null)
+            return false;
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
         
-        return claims;
+        _logger.LogInformation("User {0} deleted successfully", email);
+        return true;
     }
 }

@@ -50,4 +50,14 @@ public class AuthController(IUserService userService, ITokenService tokenService
         return Ok("Password changed successfully");
     }
 
+    [HttpDelete("Delete")]
+    [Authorize(Policy = PolicyNames.RequireHRAdmin)]
+    public async Task<IActionResult> Delete([FromBody] IncomingChangePasswordDto dto)
+    {
+        var success = await userService.DeleteUserAsync(dto.Email);
+        if (!success)
+            return BadRequest("User deletion failed");
+            
+        return Ok("User deleted successfully");
+    }
 }

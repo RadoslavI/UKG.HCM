@@ -1,4 +1,5 @@
 @page
+@using UKG.HCM.UI.Extensions
 @model UKG.HCM.UI.Pages.People.IndexModel
 @{
     ViewData["Title"] = "People";
@@ -7,7 +8,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>People Management</h2>
-        @if (User.IsInRole("HRAdmin") || User.IsInRole("Manager"))
+        @if (User.IsManagerOrAbove())
         {
             <a asp-page="Create" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Add New Person
@@ -27,7 +28,7 @@
     @if (!Model.People.Any())
     {
         <div class="alert alert-info">
-            @if (User.IsInRole("HRAdmin") || User.IsInRole("Manager"))
+            @if (User.IsManagerOrAbove())
             {
                 <p>No people records found. Click the "Add New Person" button to create one.</p>
             }
@@ -46,6 +47,7 @@
                         <th>Full Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>HireDate</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -56,6 +58,7 @@
                             <td>@person.FullName</td>
                             <td>@person.Email</td>
                             <td>@person.Role</td>
+                            <td>@person.HireDate</td>
                             <td>
                                 <a asp-page="./Details" asp-route-id="@person.Id" class="btn btn-info btn-sm">
                                     <i class="bi bi-eye"></i> View

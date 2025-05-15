@@ -1,3 +1,4 @@
+using System.Text.Json;
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
@@ -32,6 +33,28 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while creating user");
+            return false;
+        }
+    }
+    
+    public async Task<bool> DeleteUserAsync(string email)
+    {
+        try
+        {
+            var url = $"{_configuration["AuthenticationApi:DeleteEndpoint"]}?email={Uri.EscapeDataString(email)}";
+            var response = await _httpClient.DeleteAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to delete user. Status: {StatusCode}", response.StatusCode);
+                return false;
+            }
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception while deleting user");
             return false;
         }
     }

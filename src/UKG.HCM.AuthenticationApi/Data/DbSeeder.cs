@@ -16,7 +16,7 @@ public static class DbSeeder
             new()
             {
                 Id = Guid.NewGuid(),
-                FullName = "HR Admin",
+                FullName = "Jerry Admin",
                 Email = "admin@ukg.com",
                 PasswordHash = PasswordHasher.HashPassword("Admin@123"),
                 Role = ApplicationRoles.HRAdmin
@@ -24,7 +24,7 @@ public static class DbSeeder
             new()
             {
                 Id = Guid.NewGuid(),
-                FullName = "Department Manager",
+                FullName = "Jane Manager",
                 Email = "manager@ukg.com",
                 PasswordHash = PasswordHasher.HashPassword("Manager@123"),
                 Role = ApplicationRoles.Manager

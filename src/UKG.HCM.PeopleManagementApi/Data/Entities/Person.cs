@@ -11,6 +11,10 @@ public class Person
     public string Email { get; set; } = null!;
 
     public Role Role { get; set; } = Role.Employee;
+    
+    public DateTime HireDate { get; set; } = DateTime.Now;
+    
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
 
 public enum Role

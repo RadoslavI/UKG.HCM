@@ -16,6 +16,8 @@ public class PersonViewModel
     public string Role { get; set; } = ApplicationRoles.Employee;
 
     public string FullName => $"{FirstName} {LastName}";
+
+    public DateTime HireDate { get; set; }
 }
 
 public class CreatePersonViewModel
@@ -34,6 +36,9 @@ public class CreatePersonViewModel
     
     [Required]
     public string Role { get; set; } = ApplicationRoles.Employee;
+    
+    [Required]
+    public DateTime HireDate { get; set; }
 }
 
 public class UpdatePersonViewModel

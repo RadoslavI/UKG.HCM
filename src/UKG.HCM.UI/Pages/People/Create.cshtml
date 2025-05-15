@@ -42,6 +42,12 @@
                             </select>
                             <span asp-validation-for="Person.Role" class="text-danger"></span>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Person.HireDate" class="form-label">Email</label>
+                            <input asp-for="Person.HireDate" class="form-control" type="date" />
+                            <span asp-validation-for="Person.HireDate" class="text-danger"></span>
+                        </div>
 
                         <div class="d-flex justify-content-between">
                             <a asp-page="./Index" class="btn btn-secondary">Back to List</a>

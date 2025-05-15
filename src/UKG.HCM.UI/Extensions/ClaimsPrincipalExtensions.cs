@@ -12,7 +12,7 @@ public static class ClaimsPrincipalExtensions
     /// <returns>True if the user is in the role, false otherwise</returns>
     public static bool IsInRole(this ClaimsPrincipal principal, string role)
     {
-        if (principal == null)
+        if (principal is null)
             return false;
             
         return principal.HasClaim(ClaimTypes.Role, role);
