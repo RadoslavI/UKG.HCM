@@ -49,15 +49,6 @@ public class PeopleService : IPeopleService
         
         return new Uri(new Uri(baseUrl), endpoint).ToString();
     }
-
-    private void SetAuthorizationHeader()
-    {
-        if (!string.IsNullOrEmpty(_tokenStore.Token))
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new AuthenticationHeaderValue("Bearer", _tokenStore.Token);
-        }
-    }
     
     public async Task<IEnumerable<PersonViewModel>> GetPeopleAsync()
     {
@@ -197,4 +188,15 @@ public class PeopleService : IPeopleService
             return false;
         }
     }
+    
+    private void SetAuthorizationHeader()
+    {
+        if (!string.IsNullOrEmpty(_tokenStore.Token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = 
+                new AuthenticationHeaderValue("Bearer", _tokenStore.Token);
+        }
+    }
+    
+    // The Authorization header will be added by the HttpClientAuthorizationDelegatingHandler
 }

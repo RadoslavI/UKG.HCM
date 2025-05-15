@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using UKG.HCM.AuthenticationApi.Models;
+using UKG.HCM.AuthenticationApi.Data.Entities;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
 
 namespace UKG.HCM.AuthenticationApi.Services;

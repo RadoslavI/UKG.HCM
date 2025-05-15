@@ -1,4 +1,4 @@
-using UKG.HCM.AuthenticationApi.Models;
+using UKG.HCM.AuthenticationApi.Data.Entities;
 using UKG.HCM.AuthenticationApi.Utilities;
 using UKG.HCM.Shared.Constants;
 

@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
@@ -90,6 +91,52 @@ public class AuthService : IAuthService
             return (false, "An error occurred during login");
         }
     }
+    
+    public async Task<(bool success, string message)> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        try
+        {
+            SetAuthorizationHeader();
+            
+            var changePasswordEndpoint = GetEndpoint("ChangePassword");
+        
+            var request = new
+            {
+                Email = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email),
+                CurrentPassword = currentPassword,
+                NewPassword = newPassword
+            };
+
+            var response = await _httpClient.PostAsJsonAsync(changePasswordEndpoint, request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogWarning("Change password failed. Status code: {StatusCode}, Error: {Error}", 
+                    response.StatusCode, errorContent);
+                return (false, $"Change password failed: {errorContent}, Error: {response.ReasonPhrase}");
+            }
+
+            _logger.LogInformation("Password changed successfully");
+            return (true, "Password changed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing password");
+            return (false, "An error occurred while changing password");
+        }
+    }
+
+    public string? GetToken()
+    {
+        return _tokenStore.Token;
+    }
+
+    public void Logout()
+    {
+        // Call the async method without awaiting to satisfy the synchronous interface method
+        // This is not ideal, but it's a common pattern when adapting async methods to sync interfaces
+        LogoutAsync().ConfigureAwait(false);
+    }
 
     public async Task LogoutAsync()
     {
@@ -99,6 +146,15 @@ public class AuthService : IAuthService
             await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             _tokenStore.Token = null;
             _logger.LogInformation("User {Email} logged out", email);
+        }
+    }
+    
+    public void SetAuthorizationHeader()
+    {
+        if (!string.IsNullOrEmpty(_tokenStore.Token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = 
+                new AuthenticationHeaderValue("Bearer", _tokenStore.Token);
         }
     }
 
@@ -130,6 +186,4 @@ public class AuthService : IAuthService
                 });
         }
     }
-
-    // LoginResponse class has been replaced by LoginResponseModel in the Models namespace
 }

@@ -37,6 +37,8 @@ public class Program
             if (!string.IsNullOrEmpty(authApiBaseUrl))
                 client.BaseAddress = new Uri(authApiBaseUrl);
         });
+        // Ensure all session services are registered
+        builder.Services.AddDataProtection();
 
         builder.Services.AddHttpClient("PeopleApi", client =>
         {
@@ -46,8 +48,10 @@ public class Program
             
         // Register services
         builder.Services.AddSingleton<JwtTokenStore>();
+        builder.Services.AddScoped<HttpClientAuthorizationDelegatingHandler>();
         builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IPeopleService, PeopleService>();
+        builder.Services.AddHttpClient<IPeopleService, PeopleService>()
+            .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>();
         builder.Services.AddHttpContextAccessor();
         
         // Configure JSON serialization options

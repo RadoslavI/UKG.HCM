@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using UKG.HCM.AuthenticationApi.Data;
+using UKG.HCM.AuthenticationApi.Data.Entities;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
-using UKG.HCM.AuthenticationApi.Models;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
 using UKG.HCM.AuthenticationApi.Utilities;
 
@@ -23,15 +23,14 @@ public class UserService : IUserService
         
         // Allow login with either fullname or email
         return await _context.Users.FirstOrDefaultAsync(u =>
-            (u.FullName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
-             u.Email.Equals(username, StringComparison.OrdinalIgnoreCase)) &&
+            u.Email.Equals(username, StringComparison.OrdinalIgnoreCase) &&
             u.PasswordHash == passwordHash);
     }
 
     public async Task<bool> CreateUserAsync(IncomingCreateUserDto dto)
     {
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-            return false; // Already exists
+            return false;
 
         var password = dto.Password ?? PasswordHasher.GenerateRandomPassword();
         var user = new User
@@ -50,6 +49,19 @@ public class UserService : IUserService
         Console.WriteLine("Password for user {0}: {1}", user.Email, password);
         return true;
     }
+    
+    public async Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword)
+    {
+        var user = await ValidateUserAsync(email, currentPassword);
+        if (user is null)
+            return false;
+    
+        user.PasswordHash = PasswordHasher.HashPassword(newPassword);
+        await _context.SaveChangesAsync();
+    
+        return true;
+    }
+
     
     public IEnumerable<Claim> GetUserClaims(User user)
     {

@@ -1,4 +1,4 @@
-namespace UKG.HCM.AuthenticationApi.Models;
+namespace UKG.HCM.AuthenticationApi.Data.Entities;
 
 public class User
 {

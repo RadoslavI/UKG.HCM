@@ -1,7 +1,11 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UKG.HCM.AuthenticationApi.DTOs.ChangePassword;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
 using UKG.HCM.AuthenticationApi.DTOs.LoginUser;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
+using UKG.HCM.Shared.Constants;
 
 namespace UKG.HCM.AuthenticationApi.Controllers;
 
@@ -21,6 +25,7 @@ public class AuthController(IUserService userService, ITokenService tokenService
     }
     
     [HttpPost("register")]
+    [Authorize(Policy = PolicyNames.RequireHRAdmin)]
     public async Task<IActionResult> Register([FromBody] IncomingCreateUserDto dto)
     {
         var created = await userService.CreateUserAsync(dto);
@@ -29,4 +34,20 @@ public class AuthController(IUserService userService, ITokenService tokenService
 
         return Ok();
     }
+    
+    [HttpPost("change-password")]
+    [Authorize(Policy = PolicyNames.RequireAuthenticatedUser)]
+    public async Task<IActionResult> ChangePassword([FromBody] IncomingChangePasswordDto dto)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+            return Unauthorized("User not properly authenticated");
+        
+        var success = await userService.ChangePasswordAsync(dto.Email, dto.CurrentPassword, dto.NewPassword);
+        if (!success)
+            return BadRequest("Current password is incorrect");
+            
+        return Ok("Password changed successfully");
+    }
+
 }

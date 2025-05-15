@@ -1,4 +1,4 @@
-using UKG.HCM.AuthenticationApi.Models;
+using UKG.HCM.AuthenticationApi.Data.Entities;
 
 namespace UKG.HCM.AuthenticationApi.Services.Interfaces;
 

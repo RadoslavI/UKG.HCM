@@ -1,17 +1,18 @@
 namespace UKG.HCM.UI.JWT;
 
 /// <summary>
-/// A simple service to store the JWT token for the current user's session
+/// Simple service to store JWT token in memory during application lifetime
 /// </summary>
 public class JwtTokenStore
 {
-    /// <summary>
-    /// The current JWT token, if any
-    /// </summary>
-    public string? Token { get; set; }
+    private string? _token;
     
     /// <summary>
-    /// Check if a token is available
+    /// Gets or sets the JWT token
     /// </summary>
-    public bool HasToken => !string.IsNullOrEmpty(Token);
+    public string? Token
+    {
+        get => _token;
+        set => _token = value;
+    }
 }
