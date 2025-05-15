@@ -12,9 +12,9 @@ public class AuthController(IUserService userService, ITokenService tokenService
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] IncomingLoginUserDto login)
     {
-        var user = await userService.ValidateUserAsync(login.Username, login.Password);
+        var user = await userService.ValidateUserAsync(login.Email, login.Password);
         if (user is null)
-            return Unauthorized("Invalid username or password");
+            return Unauthorized("Invalid email or password");
 
         var token = tokenService.GenerateToken(user);
         return Ok(new OutgoingLoginUserDto(token));

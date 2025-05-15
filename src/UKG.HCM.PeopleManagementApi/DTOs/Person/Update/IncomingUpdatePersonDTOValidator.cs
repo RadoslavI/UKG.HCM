@@ -1,5 +1,7 @@
 using FluentValidation;
 
+using UKG.HCM.Shared.Constants;
+
 namespace UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 
 public class IncomingUpdatePersonDTOValidator : AbstractValidator<IncomingUpdatePersonDTO>
@@ -19,7 +21,8 @@ public class IncomingUpdatePersonDTOValidator : AbstractValidator<IncomingUpdate
             .EmailAddress();
 
         RuleFor(x => x.Role)
-            .IsInEnum()
+            .NotEmpty()
+            .Must(role => ApplicationRoles.All.Contains(role))
             .WithMessage("Role is invalid");
     }
 }

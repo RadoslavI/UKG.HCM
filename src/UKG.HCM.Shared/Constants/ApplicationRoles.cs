@@ -19,4 +19,11 @@ public static class ApplicationRoles
     /// Regular employee role with limited access
     /// </summary>
     public const string Employee = "Employee";
+    
+    public static readonly HashSet<string> All =
+    [
+        HRAdmin,
+        Manager,
+        Employee
+    ];
 }

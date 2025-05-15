@@ -1,4 +1,8 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using UKG.HCM.UI.JWT;
+using UKG.HCM.UI.Services;
+using UKG.HCM.UI.Services.Interfaces;
 
 namespace UKG.HCM.UI;
 
@@ -11,17 +15,47 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorPages();
         
+        // Configure Authentication
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/Auth/Login";
+                options.LogoutPath = "/Auth/Logout";
+                options.AccessDeniedPath = "/Auth/AccessDenied";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
+        // Configure HttpClients from appsettings.json
+        var authApiBaseUrl = builder.Configuration["ApiEndpoints:AuthenticationApi:BaseUrl"];
+        var peopleApiBaseUrl = builder.Configuration["ApiEndpoints:PeopleManagementApi:BaseUrl"];
+
+        // Register named HttpClients
         builder.Services.AddHttpClient("AuthApi", client =>
         {
-            client.BaseAddress = new Uri("https://localhost:7154/");
+            if (!string.IsNullOrEmpty(authApiBaseUrl))
+                client.BaseAddress = new Uri(authApiBaseUrl);
         });
 
         builder.Services.AddHttpClient("PeopleApi", client =>
         {
-            client.BaseAddress = new Uri("https://localhost:7069/");
+            if (!string.IsNullOrEmpty(peopleApiBaseUrl))
+                client.BaseAddress = new Uri(peopleApiBaseUrl);
         });
-        
+            
+        // Register services
         builder.Services.AddSingleton<JwtTokenStore>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IPeopleService, PeopleService>();
+        builder.Services.AddHttpContextAccessor();
+        
+        // Configure JSON serialization options
+        builder.Services.Configure<JsonSerializerOptions>(options =>
+        {
+            options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.PropertyNameCaseInsensitive = true;
+        });
         
         var app = builder.Build();
 
@@ -38,6 +72,7 @@ public class Program
 
         app.UseRouting();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapRazorPages();

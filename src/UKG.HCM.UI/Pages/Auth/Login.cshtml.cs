@@ -1,62 +1,63 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using UKG.HCM.UI.JWT;
+using UKG.HCM.UI.Models;
+using UKG.HCM.UI.Services.Interfaces;
 
 namespace UKG.HCM.UI.Pages.Auth;
 
 public class LoginModel : PageModel
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IAuthService _authService;
     private readonly JwtTokenStore _tokenStore;
+    private readonly ILogger<LoginModel> _logger;
 
-    public LoginModel(IHttpClientFactory httpClientFactory, JwtTokenStore tokenStore)
+    public LoginModel(IAuthService authService, JwtTokenStore tokenStore, ILogger<LoginModel> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _authService = authService;
         _tokenStore = tokenStore;
+        _logger = logger;
     }
 
     [BindProperty]
-    public string Username { get; set; }
+    public LoginRequestModel LoginRequest { get; set; } = new();
 
-    [BindProperty]
-    public string Password { get; set; }
-
+    [TempData]
     public string? ErrorMessage { get; set; }
+
+    public void OnGet()
+    {
+        // If we're already authenticated, redirect to home
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            Response.Redirect("/Index");
+        }
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var client = _httpClientFactory.CreateClient("AuthApi");
-
-        var requestBody = JsonSerializer.Serialize(new
+        if (!ModelState.IsValid)
         {
-            Username,
-            Password
-        });
-
-        var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync("api/Auth/login", content);
-        if (!response.IsSuccessStatusCode)
-        {
-            ErrorMessage = "Invalid login attempt.";
             return Page();
         }
 
-        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        if (result != null)
+        try 
         {
-            _tokenStore.Token = result.Token;
-            return RedirectToPage("/People/Index");
+            var (success, message) = await _authService.LoginAsync(LoginRequest.Email, LoginRequest.Password);
+            if (!success)
+            {
+                ErrorMessage = message;
+                return Page();
+            }
+
+            _logger.LogInformation("User logged in successfully: {Email}", LoginRequest.Email);
+            return RedirectToPage("/Index");
         }
-
-        ErrorMessage = "Something went wrong.";
-        return Page();
-    }
-
-    public class LoginResponse
-    {
-        public string Token { get; set; }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for {Email}", LoginRequest.Email);
+            ErrorMessage = "An error occurred during login.";
+            return Page();
+        }
     }
 }

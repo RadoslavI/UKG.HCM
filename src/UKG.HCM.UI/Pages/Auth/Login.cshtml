@@ -1,23 +1,43 @@
 @page
-@model LoginModel
+@model UKG.HCM.UI.Pages.Auth.LoginModel
 @{
     ViewData["Title"] = "Login";
 }
 
-<h2>Login</h2>
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center mb-0">Login</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@Model.ErrorMessage</div>
+                    }
+                    
+                    <div class="mb-3">
+                        <label asp-for="LoginRequest.Email" class="form-label">Email</label>
+                        <input asp-for="LoginRequest.Email" class="form-control" type="email" placeholder="name@example.com" />
+                        <span asp-validation-for="LoginRequest.Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="LoginRequest.Password" class="form-label">Password</label>
+                        <input asp-for="LoginRequest.Password" class="form-control" type="password" />
+                        <span asp-validation-for="LoginRequest.Password" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-<form method="post">
-    <div>
-        <label asp-for="Username"></label>
-        <input asp-for="Username" />
-    </div>
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-    </div>
-    <button type="submit">Login</button>
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <p style="color:red">@Model.ErrorMessage</p>
-    }
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

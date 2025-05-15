@@ -10,10 +10,10 @@ namespace UKG.HCM.PeopleManagementApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = PolicyNames.RequireAuthenticatedUser)]
 public class PeopleController(IPeopleService peopleService) : ControllerBase
 {
     [HttpGet]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<OutgoingGetPersonDTO>>> GetPeople()
     {
         var people = await peopleService.GetPeopleAsync();
@@ -21,7 +21,6 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
     public async Task<ActionResult<OutgoingGetPersonDTO>> GetPerson(Guid id)
     {
         var person = await peopleService.GetPersonByIdAsync(id);
@@ -32,15 +31,15 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}, {ApplicationRoles.Manager}")]
+    [Authorize(Policy = PolicyNames.RequireManagerOrAbove)]
     public async Task<ActionResult<Guid>> CreatePerson(IncomingCreatePersonDTO incoming)
     {
         var createdId = await peopleService.CreatePersonAsync(incoming);
-        return CreatedAtAction(nameof(CreatePerson), new { id = createdId });
+        return CreatedAtAction(nameof(GetPerson), new { id = createdId }, createdId);
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}, {ApplicationRoles.Manager}")]
+    [Authorize(Policy = PolicyNames.RequireManagerOrAbove)]
     public async Task<IActionResult> UpdatePerson(Guid id, IncomingUpdatePersonDTO incoming)
     {
         var updated = await peopleService.UpdatePersonAsync(id, incoming);
@@ -48,7 +47,7 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = $"{ApplicationRoles.HRAdmin}")]
+    [Authorize(Policy = PolicyNames.RequireHRAdmin)]
     public async Task<IActionResult> DeletePerson(Guid id)
     {
         var deleted = await peopleService.DeletePersonAsync(id);

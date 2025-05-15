@@ -1,18 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using UKG.HCM.UI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UKG.HCM.UI.Pages.Auth;
 
+[Authorize]
 public class LogoutModel : PageModel
 {
-    public IActionResult OnGet()
+    private readonly IAuthService _authService;
+    private readonly ILogger<LogoutModel> _logger;
+
+    public LogoutModel(IAuthService authService, ILogger<LogoutModel> logger)
     {
-        // Remove token from session (if stored there)
-        HttpContext.Session.Remove("JWT");
+        _authService = authService;
+        _logger = logger;
+    }
 
-        // Optional: clear all session
-        // HttpContext.Session.Clear();
-
-        return RedirectToPage("/Auth/Login");
+    public async Task<IActionResult> OnGetAsync()
+    {
+        await _authService.LogoutAsync();
+        return RedirectToPage("/Index");
     }
 }

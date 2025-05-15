@@ -46,7 +46,8 @@ public class UserService : IUserService
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
         
-        // You could email the password here if needed
+        // Email to the user with the temp password to be sent here instead in production env
+        Console.WriteLine("Password for user {0}: {1}", user.Email, password);
         return true;
     }
     

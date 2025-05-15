@@ -1,0 +1,55 @@
+@page "{id:guid}"
+@model UKG.HCM.UI.Pages.People.DetailsModel
+@{
+    ViewData["Title"] = "Person Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Person Details</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Person != null)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Full Name:</div>
+                            <div class="col-md-8">@Model.Person.FullName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Email:</div>
+                            <div class="col-md-8">@Model.Person.Email</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Role:</div>
+                            <div class="col-md-8">@Model.Person.Role</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-danger">Person not found</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+                        @if ((User.IsInRole("HRAdmin") || User.IsInRole("Manager")) && Model.Person != null)
+                        {
+                            <a asp-page="./Edit" asp-route-id="@Model.Person.Id" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        }
+                        @if (User.IsInRole("HRAdmin") && Model.Person != null)
+                        {
+                            <a asp-page="./Delete" asp-route-id="@Model.Person.Id" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,27 +1,61 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using UKG.HCM.UI.Extensions;
+using UKG.HCM.UI.Models;
+using UKG.HCM.UI.Services.Interfaces;
 
-namespace UKG.HCM.UI.Pages.People
+namespace UKG.HCM.UI.Pages.People;
+
+[Authorize]
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
-    {
-        // A sample list of people
-        public List<Person> People { get; set; }
+    private readonly IPeopleService _peopleService;
+    private readonly ILogger<IndexModel> _logger;
 
-        public void OnGet()
-        {
-            // Here you can replace this with logic to fetch people from a database
-            People = new List<Person>
-            {
-                new Person { Name = "John Doe", Role = "Manager" },
-                new Person { Name = "Jane Smith", Role = "Employee" },
-                new Person { Name = "Paul Brown", Role = "Developer" }
-            };
-        }
+    public IndexModel(IPeopleService peopleService, ILogger<IndexModel> logger)
+    {
+        _peopleService = peopleService;
+        _logger = logger;
     }
 
-    public class Person
+    public IEnumerable<PersonViewModel> People { get; private set; } = Array.Empty<PersonViewModel>();
+    
+    [TempData]
+    public string? StatusMessage { get; set; }
+
+    public async Task<IActionResult> OnGetAsync()
     {
-        public string Name { get; set; }
-        public string Role { get; set; }
+        try
+        {
+            if (User.IsInRole(UKG.HCM.Shared.Constants.ApplicationRoles.HRAdmin) || 
+                User.IsInRole(UKG.HCM.Shared.Constants.ApplicationRoles.Manager))
+            {
+                // Admins and Managers can see all people
+                People = await _peopleService.GetPeopleAsync();
+            }
+            else
+            {
+                // Regular employees can only see their own record
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userEmail = User.FindFirstValue(ClaimTypes.Email);
+                
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    var allPeople = await _peopleService.GetPeopleAsync();
+                    // Filter by the user's email
+                    People = allPeople.Where(p => p.Email.Equals(userEmail, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            
+            return Page();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving people");
+            StatusMessage = "Error: Failed to retrieve people records.";
+            return Page();
+        }
     }
 }

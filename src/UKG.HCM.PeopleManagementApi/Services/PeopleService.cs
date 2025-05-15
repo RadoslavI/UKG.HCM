@@ -28,7 +28,7 @@ public class PeopleService : IPeopleService
         var people = await _context.People.ToListAsync();
         
         _logger.LogInformation("People retrieved: {Count}", people.Count);
-        return people.Select(p => new OutgoingGetPersonDTO(p.Id, p.FirstName, p.LastName, p.Email, RoleTransformations.FromEnumtoEnumDTO(p.Role)));
+        return people.Select(p => new OutgoingGetPersonDTO(p.Id, p.FirstName, p.LastName, p.Email, RoleTransformations.FromEnumToString(p.Role)));
     }
 
     public async Task<OutgoingGetPersonDTO?> GetPersonByIdAsync(Guid id)
@@ -39,7 +39,7 @@ public class PeopleService : IPeopleService
             _logger.LogWarning("Person not found: {Id}", id);
             return null;
         }
-        return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumtoEnumDTO(person.Role));
+        return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumToString(person.Role));
     }
 
     public async Task<Guid> CreatePersonAsync(IncomingCreatePersonDTO incoming)
@@ -49,7 +49,7 @@ public class PeopleService : IPeopleService
             FirstName = incoming.FirstName,
             LastName = incoming.LastName,
             Email = incoming.Email,
-            Role = RoleTransformations.FromEnumDTOtoEnum(incoming.Role)
+            Role = RoleTransformations.FromStringToEnum(incoming.Role)
         };
         
         await _context.People.AddAsync(person);
@@ -77,12 +77,15 @@ public class PeopleService : IPeopleService
     {
         var person = await _context.People.FindAsync(id);
         if (person is null)
+        {
+            _logger.LogWarning("Update failed: Person with ID {Id} not found", id);
             return false;
+        }
 
         person.FirstName = incoming.FirstName;
         person.LastName = incoming.LastName;
         person.Email = incoming.Email;
-        person.Role = RoleTransformations.FromEnumDTOtoEnum(incoming.Role);
+        person.Role = RoleTransformations.FromStringToEnum(incoming.Role);
 
         _logger.LogInformation("Person updated: {FirstName} {LastName}", person.FirstName, person.LastName);
         await _context.SaveChangesAsync();
