@@ -29,7 +29,7 @@ A .NET 8+ backend solution developed for the UKG BE HCM assignment. The project 
 - C#
 - Razor Pages (for optional UI)
 - InMemory database (for local development/testing)
-- xUnit / NUnit (testing)
+- NUnit (testing)
 - Dependency Injection
 - Minimal API configuration
 - Clean architecture practices
@@ -46,7 +46,7 @@ A .NET 8+ backend solution developed for the UKG BE HCM assignment. The project 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/rivanov/ukg-hcm.git
+   git clone https://github.com/radoslavi/ukg-hcm.git
    cd ukg-hcm
    ```
 
