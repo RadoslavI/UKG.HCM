@@ -28,8 +28,8 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
         public TestWebApplicationFactory()
         {
             // Setup default behavior for IUserService
-            _mockUserService.Setup(s => s.CreateUserAsync(It.IsAny<IncomingCreateUserDto>()))
-                .ReturnsAsync(true);
+            _mockUserService.Setup(s => s.CreateUserAsync(It.IsAny<IncomingCreateOrUpdateUserDto>()))
+                .ReturnsAsync(new OperationResult(true));
 
             _mockUserService.Setup(s => s.ValidateUserAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync((string email, string password) => new User
@@ -42,10 +42,10 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
                 });
 
             _mockUserService.Setup(s => s.ChangePasswordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync(new OperationResult(true));
 
             _mockUserService.Setup(s => s.DeleteUserAsync(It.IsAny<string>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync(new OperationResult(true));
 
             // Setup default behavior for ITokenService
             _mockTokenService.Setup(s => s.GenerateToken(It.IsAny<User>()))

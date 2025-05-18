@@ -1,6 +1,6 @@
 namespace UKG.HCM.AuthenticationApi.DTOs.CreateUser;
 
-public class IncomingCreateUserDto
+public class IncomingCreateOrUpdateUserDto
 {
     public required string Email { get; set; }
     public required string FullName { get; set; }

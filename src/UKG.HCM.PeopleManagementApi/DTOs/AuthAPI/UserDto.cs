@@ -2,7 +2,7 @@ using UKG.HCM.Shared.Constants;
 
 namespace UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 
-public class CreateUserDto
+public class UserDto
 {
     public string Email { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;

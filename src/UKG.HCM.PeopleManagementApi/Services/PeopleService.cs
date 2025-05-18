@@ -56,21 +56,20 @@ public class PeopleService : IPeopleService
         
         await _context.People.AddAsync(person);
 
-        var userDto = new CreateUserDto
+        var userDto = new UserDto
         {
             Email = person.Email,
             FullName = person.FirstName + " " + person.LastName,
             Role = person.Role.ToString()
         };
 
-        var success = await _authService.CreateUserAsync(userDto);
+        var success = await _authService.UpdateUserAsync(userDto);
         if (!success)
         {
-            _context.People.Remove(person);
-            _logger.LogWarning("Person created but user creation in Auth API failed for {Email}", person.Email);
+            _logger.LogWarning("User creation in Auth API failed for {Email}", person.Email);
         }
         
-        _logger.LogInformation("Person created: {FirstName} {LastName}", person.FirstName, person.LastName);
+        _logger.LogInformation("Person updated: {email}", person.Email);
         await _context.SaveChangesAsync();
         return person.Id;
     }
@@ -88,6 +87,20 @@ public class PeopleService : IPeopleService
         person.LastName = incoming.LastName;
         person.Email = incoming.Email;
         person.Role = RoleTransformations.FromStringToEnum(incoming.Role);
+        
+        var userDto = new UserDto
+        {
+            Email = person.Email,
+            FullName = person.FirstName + " " + person.LastName,
+            Role = person.Role.ToString()
+        };
+
+        var success = await _authService.CreateUserAsync(userDto);
+        if (!success)
+        {
+            _context.People.Remove(person);
+            _logger.LogWarning("Person created but user creation in Auth API failed for {Email}", person.Email);
+        }
 
         _logger.LogInformation("Person updated: {FirstName} {LastName}", person.FirstName, person.LastName);
         await _context.SaveChangesAsync();

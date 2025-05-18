@@ -27,10 +27,10 @@ public class UserService : IUserService
             u.PasswordHash == passwordHash);
     }
 
-    public async Task<bool> CreateUserAsync(IncomingCreateUserDto dto)
+    public async Task<OperationResult> CreateUserAsync(IncomingCreateOrUpdateUserDto dto)
     {
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-            return false;
+            return OperationResult.FailureResult("User already exists");    
 
         var password = dto.Password ?? PasswordHasher.GenerateRandomPassword();
         var user = new User
@@ -47,36 +47,53 @@ public class UserService : IUserService
         
         // Email to the user with the temp password to be sent here instead if in production env
         _logger.LogInformation("User {0} was created with password: {1}", user.Email, password);
-        return true;
+        return OperationResult.SuccessResult();    
     }
-    
-    public async Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword)
+
+    public async Task<OperationResult> UpdateUserAsync(IncomingCreateOrUpdateUserDto dto)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (user is null)
+        {
+            _logger.LogWarning("User {0} not found", dto.Email);
+            return OperationResult.FailureResult($"User {dto.Email} not found");    
+        } 
+        
+        user.FullName = dto.FullName;
+        user.Role = dto.Role;
+        user.Email = dto.Email;
+        await _context.SaveChangesAsync();
+        
+        _logger.LogInformation("User {0} was updated successfully", user.Email);
+        return OperationResult.SuccessResult();
+    }
+
+    public async Task<OperationResult> ChangePasswordAsync(string email, string currentPassword, string newPassword)
     {
         var user = await ValidateUserAsync(email, currentPassword);
         if (user is null)
         {
             _logger.LogWarning("User {0} not found or password is incorrect", email);
-            return false;
+            return OperationResult.FailureResult($"User {email} not found or password is incorrect");
         }
     
         user.PasswordHash = PasswordHasher.HashPassword(newPassword);
         await _context.SaveChangesAsync();
     
         _logger.LogInformation("Password for user {0} changed successfully", email);
-        
-        return true;
+        return OperationResult.SuccessResult();
     }
     
-    public async Task<bool> DeleteUserAsync(string email)
+    public async Task<OperationResult> DeleteUserAsync(string email)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user is null)
-            return false;
+            return OperationResult.FailureResult($"User {email} not found");
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
         
         _logger.LogInformation("User {0} deleted successfully", email);
-        return true;
+        return OperationResult.SuccessResult();
     }
 }

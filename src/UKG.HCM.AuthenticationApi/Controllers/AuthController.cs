@@ -14,7 +14,7 @@ namespace UKG.HCM.AuthenticationApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
-    [HttpPost("login")]
+    [HttpGet("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] IncomingLoginUserDto login)
     {
@@ -28,16 +28,27 @@ public class AuthController(IUserService userService, ITokenService tokenService
     
     [HttpPost("register")]
     [Authorize(Policy = PolicyNames.RequireHRAdmin)]
-    public async Task<IActionResult> Register([FromBody] IncomingCreateUserDto dto)
+    public async Task<IActionResult> Register([FromBody] IncomingCreateOrUpdateUserDto dto)
     {
-        var created = await userService.CreateUserAsync(dto);
-        if (!created)
-            return Conflict($"User with email {dto.Email} already exists.");
+        var result = await userService.CreateUserAsync(dto);
+        if (!result.Success)
+            return Conflict(result.ErrorMessage);
 
-        return Ok();
+        return Ok("User registered successfully");
     }
     
-    [HttpPost("change-password")]
+    [HttpPut("update")]
+    [Authorize(Policy = PolicyNames.RequireManagerOrAbove)]
+    public async Task<IActionResult> Update([FromBody] IncomingCreateOrUpdateUserDto dto)
+    {
+        var result = await userService.UpdateUserAsync(dto);
+        if (!result.Success)
+            return BadRequest(result.ErrorMessage);
+
+        return Ok("User updated successfully");
+    }
+    
+    [HttpPatch("change-password")]
     [Authorize(Policy = PolicyNames.RequireAuthenticatedUser)]
     public async Task<IActionResult> ChangePassword([FromBody] IncomingChangePasswordDto dto)
     {
@@ -45,9 +56,9 @@ public class AuthController(IUserService userService, ITokenService tokenService
         if (string.IsNullOrEmpty(email))
             return Unauthorized("User not properly authenticated");
         
-        var success = await userService.ChangePasswordAsync(dto.Email, dto.CurrentPassword, dto.NewPassword);
-        if (!success)
-            return BadRequest("Current password is incorrect");
+        var result = await userService.ChangePasswordAsync(dto.Email, dto.CurrentPassword, dto.NewPassword);
+        if (!result.Success)
+            return BadRequest(result.ErrorMessage);
             
         return Ok("Password changed successfully");
     }
@@ -56,9 +67,9 @@ public class AuthController(IUserService userService, ITokenService tokenService
     [Authorize(Policy = PolicyNames.RequireHRAdmin)]
     public async Task<IActionResult> Delete([FromBody] IncomingDeleteUserDTO dto)
     {
-        var success = await userService.DeleteUserAsync(dto.Email);
-        if (!success)
-            return BadRequest("User deletion failed");
+        var result = await userService.DeleteUserAsync(dto.Email);
+        if (!result.Success)
+            return BadRequest(result.ErrorMessage);
             
         return Ok("User deleted successfully");
     }

@@ -17,7 +17,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<bool> CreateUserAsync(CreateUserDto dto)
+    public async Task<bool> CreateUserAsync(UserDto dto)
     {
         try
         {
@@ -33,6 +33,26 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while creating user");
+            return false;
+        }
+    }
+    
+    public async Task<bool> UpdateUserAsync(UserDto dto)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync(_configuration["AuthenticationApi:UpdateEndpoint"], dto);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to update user. Status: {StatusCode}", response.StatusCode);
+                return false;
+            }
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception while updating user");
             return false;
         }
     }

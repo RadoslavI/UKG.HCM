@@ -30,7 +30,7 @@ public class PeopleServiceTests
         _mockLogger = new Mock<ILogger<PeopleService>>();
         
         // Set default behavior for auth service to prevent exceptions
-        _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<CreateUserDto>()))
+        _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
             .ReturnsAsync(true);
         _mockAuthService.Setup(a => a.DeleteUserAsync(It.IsAny<string>()))
             .ReturnsAsync(true);
@@ -102,7 +102,7 @@ public class PeopleServiceTests
         
         // Setup auth service to return success for this create operation
         _mockAuthService
-            .Setup(a => a.CreateUserAsync(It.IsAny<CreateUserDto>()))
+            .Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
             .ReturnsAsync(true);
         
         // Act

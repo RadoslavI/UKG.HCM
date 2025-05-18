@@ -4,6 +4,7 @@ namespace UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 public interface IAuthService
 {
-    Task<bool> CreateUserAsync(CreateUserDto dto);
+    Task<bool> CreateUserAsync(UserDto dto);
     Task<bool> DeleteUserAsync(string email);
+    Task<bool> UpdateUserAsync(UserDto dto);
 }

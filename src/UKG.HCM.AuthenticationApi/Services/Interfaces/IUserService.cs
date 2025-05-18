@@ -1,12 +1,14 @@
 using UKG.HCM.AuthenticationApi.Data.Entities;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.AuthenticationApi.Services.Interfaces;
 
 public interface IUserService
 {
     Task<User?> ValidateUserAsync(string username, string password);
-    Task<bool> CreateUserAsync(IncomingCreateUserDto dto);
-    Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword);
-    Task<bool> DeleteUserAsync(string email);
+    Task<OperationResult> CreateUserAsync(IncomingCreateOrUpdateUserDto dto);
+    Task<OperationResult> UpdateUserAsync(IncomingCreateOrUpdateUserDto dto);
+    Task<OperationResult> ChangePasswordAsync(string email, string currentPassword, string newPassword);
+    Task<OperationResult> DeleteUserAsync(string email);
 }

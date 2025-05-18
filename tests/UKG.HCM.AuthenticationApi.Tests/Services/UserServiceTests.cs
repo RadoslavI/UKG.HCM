@@ -36,7 +36,7 @@ public class UserServiceTests
     [Test]
     public async Task CreateUserAsync_ValidDto_ReturnsTrueAndSavesUser()
     {
-        var dto = new IncomingCreateUserDto
+        var dto = new IncomingCreateOrUpdateUserDto
         {
             Email = "john.doe@example.com",
             FullName = "John Doe",
@@ -68,7 +68,7 @@ public class UserServiceTests
         await _context.Users.AddAsync(existingUser);
         await _context.SaveChangesAsync();
 
-        var dto = new IncomingCreateUserDto
+        var dto = new IncomingCreateOrUpdateUserDto
         {
             Email = "existing@example.com",
             FullName = "Duplicate",

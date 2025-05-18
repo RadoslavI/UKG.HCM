@@ -23,7 +23,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
     public TestWebApplicationFactory()
     {
         // Setup default behavior for auth service
-        _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<CreateUserDto>()))
+        _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
             .ReturnsAsync(true);
         _mockAuthService.Setup(a => a.DeleteUserAsync(It.IsAny<string>()))
             .ReturnsAsync(true);
@@ -49,7 +49,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
             });
 
             // Replace IAuthService with mock
-            services.AddSingleton<IAuthService>(_mockAuthService.Object);
+            services.AddSingleton(_mockAuthService.Object);
 
             // Add authentication test services
             services.AddSingleton<IPolicyEvaluator, FakePolicyEvaluator>();
@@ -66,16 +66,6 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 
             // Ensure database is created
             db.Database.EnsureCreated();
-
-            try
-            {
-                // Seed the database with test data if needed
-                // InitializeDbForTests(db);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred seeding the database. Error: {Message}", ex.Message);
-            }
         });
     }
 

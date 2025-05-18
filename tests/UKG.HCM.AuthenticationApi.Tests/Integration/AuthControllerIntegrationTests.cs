@@ -35,7 +35,7 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
         [Test]
         public async Task CreateUser_ReturnsSuccess()
         {
-            var createUserDto = new IncomingCreateUserDto
+            var createUserDto = new IncomingCreateOrUpdateUserDto
             {
                 Email = "newuser@example.com",
                 FullName = "New User",
@@ -47,7 +47,7 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
             response.EnsureSuccessStatusCode();
 
             var userServiceMock = _factory.GetUserServiceMock();
-            userServiceMock.Verify(s => s.CreateUserAsync(It.IsAny<IncomingCreateUserDto>()), Times.Once);
+            userServiceMock.Verify(s => s.CreateUserAsync(It.IsAny<IncomingCreateOrUpdateUserDto>()), Times.Once);
         }
 
         [Test]
