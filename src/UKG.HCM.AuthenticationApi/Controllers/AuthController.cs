@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UKG.HCM.AuthenticationApi.DTOs.ChangePassword;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
+using UKG.HCM.AuthenticationApi.DTOs.DeleteUser;
 using UKG.HCM.AuthenticationApi.DTOs.LoginUser;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
 using UKG.HCM.Shared.Constants;
@@ -53,7 +54,7 @@ public class AuthController(IUserService userService, ITokenService tokenService
 
     [HttpDelete("Delete")]
     [Authorize(Policy = PolicyNames.RequireHRAdmin)]
-    public async Task<IActionResult> Delete([FromBody] IncomingChangePasswordDto dto)
+    public async Task<IActionResult> Delete([FromBody] IncomingDeleteUserDTO dto)
     {
         var success = await userService.DeleteUserAsync(dto.Email);
         if (!success)

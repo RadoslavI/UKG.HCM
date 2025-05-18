@@ -65,7 +65,7 @@ public class AuthServiceIntegrationTests
     public async Task CreateUserAsync_Integration_ReturnsExpectedResult()
     {
         // Arrange
-        var userDto = new CreateUserDto
+        var userDto = new UserDto
         {
             Email = "integration.test@example.com",
             FullName = "Integration Test User",

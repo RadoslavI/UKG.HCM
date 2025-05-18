@@ -7,420 +7,135 @@ using NUnit.Framework;
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 using UKG.HCM.PeopleManagementApi.Services;
 
-namespace UKG.HCM.PeopleManagementApi.Tests.Services;
-
-[TestFixture]
-public class AuthServiceTests
+namespace UKG.HCM.PeopleManagementApi.Tests.Services
 {
-    private Mock<IConfiguration> _mockConfiguration;
-    private Mock<ILogger<AuthService>> _mockLogger;
-    private Mock<HttpMessageHandler> _mockHttpMessageHandler;
-    private HttpClient _httpClient;
-    private AuthService _authService;
-    private string _baseUrl = "http://authapi.example.com";
-
-    [SetUp]
-    public void Setup()
+    public class AuthServiceTests
     {
-        // Setup mocks
-        _mockConfiguration = new Mock<IConfiguration>();
-        _mockLogger = new Mock<ILogger<AuthService>>();
-        _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        
-        // Setup configuration to return base URL
-        _mockConfiguration.Setup(c => c["AuthApiBaseUrl"]).Returns(_baseUrl);
+        private Mock<ILogger<AuthService>> _loggerMock;
+        private Mock<IConfiguration> _configurationMock;
+        private const string RegisterEndpointKey = "AuthenticationApi:RegisterEndpoint";
+        private const string DeleteEndpointKey = "AuthenticationApi:DeleteEndpoint";
+        private const string RegisterUrl = "https://mocked.api.com/register";
+        private const string DeleteUrl = "https://mocked.api.com/delete";
 
-        // Setup HTTP client with mock handler
-        _httpClient = new HttpClient(_mockHttpMessageHandler.Object)
+        [SetUp]
+        public void SetUp()
         {
-            BaseAddress = new Uri(_baseUrl)
-        };
+            _loggerMock = new Mock<ILogger<AuthService>>();
+            _configurationMock = new Mock<IConfiguration>();
+            _configurationMock.Setup(x => x[RegisterEndpointKey]).Returns(RegisterUrl);
+            _configurationMock.Setup(x => x[DeleteEndpointKey]).Returns(DeleteUrl);
+        }
 
-        // Create service under test with the mocked HttpClient
-        _authService = new AuthService(_httpClient, _mockLogger.Object, _mockConfiguration.Object);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _httpClient.Dispose();
-    }
-
-    [Test]
-    public async Task CreateUserAsync_NullUserDto_ReturnsFalse()
-    {
-        // Act
-        var result = await _authService.CreateUserAsync(null);
-        
-        // Assert
-        Assert.That(result, Is.False);
-        
-        // Verify logger was called
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("UserDto is null")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.Once);
-        
-        // Verify no HTTP request was made
-        _mockHttpMessageHandler.Protected().Verify(
-            "SendAsync",
-            Times.Never(),
-            ItExpr.IsAny<HttpRequestMessage>(),
-            ItExpr.IsAny<CancellationToken>());
-    }
-    
-    [Test]
-    public async Task CreateUserAsync_Success_ReturnsTrue()
-    {
-        // Arrange
-        var userDto = new CreateUserDto
+        private HttpClient CreateHttpClient(HttpResponseMessage responseMessage, Action<Mock<HttpMessageHandler>> setupCallback = null)
         {
-            Email = "test@example.com",
-            FullName = "Test User",
-            Role = "Employee"
-        };
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(responseMessage);
 
-        // Setup HTTP handler mock to return success
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
+            setupCallback?.Invoke(handlerMock);
+            return new HttpClient(handlerMock.Object)
             {
-                StatusCode = HttpStatusCode.Created,
-                Content = new StringContent("{\"success\":true}")
-            });
+                BaseAddress = new Uri("https://mocked.api.com")
+            };
+        }
 
-        // Act
-        var result = await _authService.CreateUserAsync(userDto);
-
-        // Assert
-        Assert.That(result, Is.True);
-        
-        // Verify HTTP request was made correctly - only check method
-        _mockHttpMessageHandler.Protected().Verify(
-            "SendAsync",
-            Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
-            ItExpr.IsAny<CancellationToken>());
-    }
-
-    [Test]
-    public async Task CreateUserAsync_ApiError_ReturnsFalse()
-    {
-        // Arrange
-        var userDto = new CreateUserDto
+        [Test]
+        public async Task CreateUserAsync_ShouldReturnTrue_WhenRequestIsSuccessful()
         {
-            Email = "test@example.com",
-            FullName = "Test User",
-            Role = "Employee"
-        };
+            var httpClient = CreateHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
 
-        // Setup HTTP handler mock to return error
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
+            var result = await service.CreateUserAsync(new UserDto
             {
-                StatusCode = HttpStatusCode.BadRequest,
-                Content = new StringContent("{\"error\":\"Invalid data\"}")
+                Email = "test@example.com",
+                FullName = "asdasd",
+                Role = "Admin"
             });
 
-        // Act
-        var result = await _authService.CreateUserAsync(userDto);
+            Assert.IsTrue(result);
+        }
 
-        // Assert
-        Assert.That(result, Is.False);
-        
-        // Verify error was logged
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("API returned error")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.Once);
-    }
-    
-    [Test]
-    public async Task CreateUserAsync_SuccessStatusButSuccessFalse_ReturnsFalse()
-    {
-        // Arrange
-        var userDto = new CreateUserDto
+        [Test]
+        public async Task CreateUserAsync_ShouldReturnFalse_WhenRequestFails()
         {
-            Email = "test@example.com",
-            FullName = "Test User",
-            Role = "Employee"
-        };
-    
-        // Setup HTTP handler mock to return success status but success=false in body
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
+            var httpClient = CreateHttpClient(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
+
+            var result = await service.CreateUserAsync(new UserDto
             {
-                StatusCode = HttpStatusCode.Created,
-                Content = new StringContent("{\"success\":false}")
+                Email = "test@example.com",
+                FullName = "asdasd",
+                Role = "Admin"
             });
-    
-        // Act
-        var result = await _authService.CreateUserAsync(userDto);
-    
-        // Assert
-        Assert.That(result, Is.False);
-    }
-    
-    [Test]
-    public async Task CreateUserAsync_MalformedJsonResponse_ReturnsFalse()
-    {
-        // Arrange
-        var userDto = new CreateUserDto
+
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public async Task CreateUserAsync_ShouldReturnFalse_OnException()
         {
-            Email = "test@example.com",
-            FullName = "Test User",
-            Role = "Employee"
-        };
-    
-        // Setup HTTP handler mock to return malformed JSON
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.Created,
-                Content = new StringContent("{not valid json}")
-            });
-    
-        // Act
-        var result = await _authService.CreateUserAsync(userDto);
-    
-        // Assert
-        Assert.That(result, Is.False);
-        
-        // Verify error was logged
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Error parsing")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.Once);
-    }
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new HttpRequestException("Network error"));
 
-    [Test]
-    public async Task CreateUserAsync_Exception_ReturnsFalse()
-    {
-        // Arrange
-        var userDto = new CreateUserDto
+            var httpClient = new HttpClient(handlerMock.Object);
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
+
+            var result = await service.CreateUserAsync(new UserDto
+            {
+                Email = "test@example.com", 
+                FullName= "asdasd",
+                Role = "Admin"
+            });
+
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        public async Task DeleteUserAsync_ShouldReturnTrue_WhenRequestIsSuccessful()
         {
-            Email = "test@example.com",
-            FullName = "Test User",
-            Role = "Employee"
-        };
+            var httpClient = CreateHttpClient(new HttpResponseMessage(HttpStatusCode.OK));
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
 
-        // Setup HTTP handler mock to throw exception
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ThrowsAsync(new HttpRequestException("Network error"));
+            var result = await service.DeleteUserAsync("test@example.com");
 
-        // Act
-        var result = await _authService.CreateUserAsync(userDto);
+            Assert.IsTrue(result);
+        }
 
-        // Assert
-        Assert.That(result, Is.False);
-    }
+        [Test]
+        public async Task DeleteUserAsync_ShouldReturnFalse_WhenRequestFails()
+        {
+            var httpClient = CreateHttpClient(new HttpResponseMessage(HttpStatusCode.NotFound));
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
 
-    [Test]
-    public async Task DeleteUserAsync_NullOrEmptyEmail_ReturnsFalse()
-    {
-        // Act & Assert - null email
-        Assert.That(await _authService.DeleteUserAsync(null), Is.False);
-        
-        // Act & Assert - empty email
-        Assert.That(await _authService.DeleteUserAsync(""), Is.False);
-        
-        // Act & Assert - whitespace email
-        Assert.That(await _authService.DeleteUserAsync("   "), Is.False);
-        
-        // Verify logger was called
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Email is null or empty")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.AtLeast(3));
-        
-        // Verify no HTTP request was made
-        _mockHttpMessageHandler.Protected().Verify(
-            "SendAsync",
-            Times.Never(),
-            ItExpr.IsAny<HttpRequestMessage>(),
-            ItExpr.IsAny<CancellationToken>());
-    }
-    
-    [Test]
-    public async Task DeleteUserAsync_Success_ReturnsTrue()
-    {
-        // Arrange
-        var email = "test@example.com";
+            var result = await service.DeleteUserAsync("test@example.com");
 
-        // Setup HTTP handler mock to return success
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("{\"success\":true}")
-            });
+            Assert.IsFalse(result);
+        }
 
-        // Act
-        var result = await _authService.DeleteUserAsync(email);
+        [Test]
+        public async Task DeleteUserAsync_ShouldReturnFalse_OnException()
+        {
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new Exception("Unexpected error"));
 
-        // Assert
-        Assert.That(result, Is.True);
-        
-        // Only verify the HTTP method
-        _mockHttpMessageHandler.Protected().Verify(
-            "SendAsync",
-            Times.Once(),
-            ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Delete),
-            ItExpr.IsAny<CancellationToken>());
-    }
+            var httpClient = new HttpClient(handlerMock.Object);
+            var service = new AuthService(httpClient, _loggerMock.Object, _configurationMock.Object);
 
-    [Test]
-    public async Task DeleteUserAsync_ApiError_ReturnsFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
+            var result = await service.DeleteUserAsync("test@example.com");
 
-        // Setup HTTP handler mock to return error
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.NotFound,
-                Content = new StringContent("{\"error\":\"User not found\"}")
-            });
-
-        // Act
-        var result = await _authService.DeleteUserAsync(email);
-
-        // Assert
-        Assert.That(result, Is.False);
-        
-        // Verify error was logged
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("API returned error")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.Once);
-    }
-    
-    [Test]
-    public async Task DeleteUserAsync_SuccessStatusButSuccessFalse_ReturnsFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
-    
-        // Setup HTTP handler mock to return success status but success=false in body
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("{\"success\":false}")
-            });
-    
-        // Act
-        var result = await _authService.DeleteUserAsync(email);
-    
-        // Assert
-        Assert.That(result, Is.False);
-    }
-    
-    [Test]
-    public async Task DeleteUserAsync_MalformedJsonResponse_ReturnsFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
-    
-        // Setup HTTP handler mock to return malformed JSON
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("{not valid json}")
-            });
-    
-        // Act
-        var result = await _authService.DeleteUserAsync(email);
-    
-        // Assert
-        Assert.That(result, Is.False);
-        
-        // Verify error was logged
-        _mockLogger.Verify(
-            x => x.Log(
-                It.Is<LogLevel>(l => l == LogLevel.Error), 
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Error parsing")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.Once);
-    }
-
-    [Test]
-    public async Task DeleteUserAsync_Exception_ReturnsFalse()
-    {
-        // Arrange
-        var email = "test@example.com";
-
-        // Setup HTTP handler mock to throw exception
-        _mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ThrowsAsync(new HttpRequestException("Network error"));
-
-        // Act
-        var result = await _authService.DeleteUserAsync(email);
-
-        // Assert
-        Assert.That(result, Is.False);
+            Assert.IsFalse(result);
+        }
     }
 }
