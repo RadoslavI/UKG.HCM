@@ -100,17 +100,16 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
 
         [Test]
         public async Task DeleteUser_ReturnsSuccess()
-        {
-            var deleteDto = new IncomingDeleteUserDTO("deleteuser@example.com");
+        {   
+            var email = "deleteuser@example.com";
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "/api/auth/Delete");
-            request.Content = JsonContent.Create(deleteDto);
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/auth/{Uri.EscapeDataString(email)}");
 
             var response = await _client.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             var userServiceMock = _factory.GetUserServiceMock();
-            userServiceMock.Verify(s => s.DeleteUserAsync(deleteDto.Email), Times.Once);
+            userServiceMock.Verify(s => s.DeleteUserAsync(email), Times.Once);
         }
     }
 }
