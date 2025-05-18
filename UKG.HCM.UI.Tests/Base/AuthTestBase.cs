@@ -51,7 +51,6 @@ public abstract class AuthTestBase
         passwordInput.SendKeys(password);
         loginButton.Click();
 
-        // After login, "People" link should appear
         Wait.Until(d => d.FindElement(By.LinkText("People")));
     }
     
@@ -63,4 +62,26 @@ public abstract class AuthTestBase
     protected void LoginAsAdmin() => LoginAs(AdminEmail, AdminPassword);
     protected void LoginAsManager() => LoginAs(ManagerEmail, ManagerPassword);
     protected void LoginAsEmployee() => LoginAs(EmployeeEmail, EmployeePassword);
+    
+    protected (Guid, string) CreateTempPersonViaUI()
+    {
+        Driver.Navigate().GoToUrl($"{BaseUrl}/People/Create");
+
+        var email = $"view_{Guid.NewGuid()}@example.com";
+        var firstName = "View";
+        var lastName = "User";
+        var hireDate = DateTime.Today.ToString("dd-MM-yyyy");
+
+        Driver.FindElement(By.Id("Person_FirstName")).SendKeys(firstName);
+        Driver.FindElement(By.Id("Person_LastName")).SendKeys(lastName);
+        Driver.FindElement(By.Id("Person_Email")).SendKeys(email);
+        new SelectElement(Driver.FindElement(By.Id("Person_Role"))).SelectByText("Employee");
+        Driver.FindElement(By.Id("Person_HireDate")).SendKeys(hireDate);
+        Driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        Wait.Until(d => d.Url.Contains("/People/Details"));
+
+        var id = Guid.Parse(Driver.Url.Split("/").Last());
+        return (id, email);
+    }
 }
