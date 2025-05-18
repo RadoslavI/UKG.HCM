@@ -7,6 +7,7 @@ using UKG.HCM.PeopleManagementApi.DTOs.Person.Get;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 using UKG.HCM.PeopleManagementApi.Extentions;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Services;
 
@@ -42,7 +43,7 @@ public class PeopleService : IPeopleService
         return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumToString(person.Role), person.HireDate);
     }
 
-    public async Task<Guid> CreatePersonAsync(IncomingCreatePersonDTO incoming)
+    public async Task<Guid?> CreatePersonAsync(IncomingCreatePersonDTO incoming)
     {
         var person = new Person
         {
@@ -63,10 +64,11 @@ public class PeopleService : IPeopleService
             Role = person.Role.ToString()
         };
 
-        var success = await _authService.UpdateUserAsync(userDto);
-        if (!success)
+        var result = await _authService.UpdateUserAsync(userDto);
+        if (!result.Success)
         {
             _logger.LogWarning("User creation in Auth API failed for {Email}", person.Email);
+            return null;
         }
         
         _logger.LogInformation("Person updated: {email}", person.Email);
@@ -74,13 +76,13 @@ public class PeopleService : IPeopleService
         return person.Id;
     }
 
-    public async Task<bool> UpdatePersonAsync(Guid id, IncomingUpdatePersonDTO incoming)
+    public async Task<OperationResult> UpdatePersonAsync(Guid id, IncomingUpdatePersonDTO incoming)
     {
         var person = await _context.People.FindAsync(id);
         if (person is null)
         {
             _logger.LogWarning("Update failed: Person with ID {Id} not found", id);
-            return false;
+            return OperationResult.FailureResult($"Update failed: Person with ID {id} not found");
         }
 
         person.FirstName = incoming.FirstName;
@@ -95,37 +97,39 @@ public class PeopleService : IPeopleService
             Role = person.Role.ToString()
         };
 
-        var success = await _authService.CreateUserAsync(userDto);
-        if (!success)
+        var result = await _authService.CreateUserAsync(userDto);
+        if (!result.Success)
         {
             _context.People.Remove(person);
             _logger.LogWarning("Person created but user creation in Auth API failed for {Email}", person.Email);
+            return OperationResult.FailureResult($"Person created but user creation in Auth API failed for {person.Email}");
         }
 
         _logger.LogInformation("Person updated: {FirstName} {LastName}", person.FirstName, person.LastName);
         await _context.SaveChangesAsync();
-        return true;
+        return OperationResult.SuccessResult();
     }
 
-    public async Task<bool> DeletePersonAsync(Guid id)
+    public async Task<OperationResult> DeletePersonAsync(Guid id)
     {
         var person = await _context.People.FindAsync(id);
         if (person is null)
         {
-            _logger.LogWarning("Delete failed: Person with ID {Id} not found", id);
-            return false;
+            _logger.LogWarning($"Delete failed: Person with ID {id} not found");
+            return OperationResult.FailureResult($"Delete failed: Person with ID {id} not found");
         }
         
-        var success = await _authService.DeleteUserAsync(person.Email);
-        if (!success)
+        var result = await _authService.DeleteUserAsync(person.Email);
+        if (!result.Success)
         {
             _logger.LogWarning("Failed to delete user in Auth API for {Email}", person.Email);
-            return false;
+            return OperationResult.FailureResult($"Failed to delete user in Auth API for {person.Email}");
         }
         
         _context.People.Remove(person);
         await _context.SaveChangesAsync();
+        
         _logger.LogInformation("Person deleted: {FirstName} {LastName}", person.FirstName, person.LastName);
-        return true;
+        return OperationResult.SuccessResult();
     }
 }

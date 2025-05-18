@@ -1,10 +1,11 @@
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Services.Interfaces;
 
 public interface IAuthService
 {
-    Task<bool> CreateUserAsync(UserDto dto);
-    Task<bool> DeleteUserAsync(string email);
-    Task<bool> UpdateUserAsync(UserDto dto);
+    Task<OperationResult> CreateUserAsync(UserDto dto);
+    Task<OperationResult> DeleteUserAsync(string email);
+    Task<OperationResult> UpdateUserAsync(UserDto dto);
 }

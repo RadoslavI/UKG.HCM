@@ -1,6 +1,6 @@
-using System.Text.Json;
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Services;
 
@@ -17,47 +17,47 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<bool> CreateUserAsync(UserDto dto)
+    public async Task<OperationResult> CreateUserAsync(UserDto dto)
     {
         try
         {
             var response = await _httpClient.PostAsJsonAsync(_configuration["AuthenticationApi:RegisterEndpoint"], dto);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Failed to create user. Status: {StatusCode}", response.StatusCode);
-                return false;
+                _logger.LogWarning($"Failed to create user. Status: {response.StatusCode}");
+                return OperationResult.FailureResult($"Failed to create user. Status: {response.StatusCode}");
             }
             
-            return true;
+            return OperationResult.SuccessResult();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while creating user");
-            return false;
+            return OperationResult.FailureResult(ex.Message);
         }
     }
     
-    public async Task<bool> UpdateUserAsync(UserDto dto)
+    public async Task<OperationResult> UpdateUserAsync(UserDto dto)
     {
         try
         {
             var response = await _httpClient.PostAsJsonAsync(_configuration["AuthenticationApi:UpdateEndpoint"], dto);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Failed to update user. Status: {StatusCode}", response.StatusCode);
-                return false;
+                _logger.LogWarning($"Failed to update user. Status: {response.StatusCode}");
+                return OperationResult.FailureResult($"Failed to update user. Status: {response.StatusCode}");
             }
             
-            return true;
+            return OperationResult.SuccessResult();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while updating user");
-            return false;
+            return OperationResult.FailureResult(ex.Message);;
         }
     }
     
-    public async Task<bool> DeleteUserAsync(string email)
+    public async Task<OperationResult> DeleteUserAsync(string email)
     {
         try
         {
@@ -66,16 +66,16 @@ public class AuthService : IAuthService
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Failed to delete user. Status: {StatusCode}", response.StatusCode);
-                return false;
+                _logger.LogWarning($"Failed to delete user. Status: {response.StatusCode}");
+                return OperationResult.FailureResult($"Failed to delete user. Status: {response.StatusCode}");
             }
             
-            return true;
+            return OperationResult.SuccessResult();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception while deleting user");
-            return false;
+            return OperationResult.FailureResult(ex.Message);
         }
     }
 }

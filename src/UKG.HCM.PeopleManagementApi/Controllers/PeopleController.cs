@@ -34,23 +34,23 @@ public class PeopleController(IPeopleService peopleService) : ControllerBase
     [Authorize(Policy = PolicyNames.RequireManagerOrAbove)]
     public async Task<ActionResult<Guid>> CreatePerson(IncomingCreatePersonDTO incoming)
     {
-        var createdId = await peopleService.CreatePersonAsync(incoming);
-        return CreatedAtAction(nameof(GetPerson), new { id = createdId }, createdId);
+        var result = await peopleService.CreatePersonAsync(incoming);
+        return CreatedAtAction(nameof(GetPerson), new { id = result }, result);
     }
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = PolicyNames.RequireManagerOrAbove)]
     public async Task<IActionResult> UpdatePerson(Guid id, IncomingUpdatePersonDTO incoming)
     {
-        var updated = await peopleService.UpdatePersonAsync(id, incoming);
-        return updated ? NoContent() : NotFound();
+        var result = await peopleService.UpdatePersonAsync(id, incoming);
+        return result.Success ? NoContent() : NotFound();
     }
 
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = PolicyNames.RequireHRAdmin)]
     public async Task<IActionResult> DeletePerson(Guid id)
     {
-        var deleted = await peopleService.DeletePersonAsync(id);
-        return deleted ? NoContent() : NotFound();
+        var result = await peopleService.DeletePersonAsync(id);
+        return result.Success ? NoContent() : NotFound();
     }
 }
