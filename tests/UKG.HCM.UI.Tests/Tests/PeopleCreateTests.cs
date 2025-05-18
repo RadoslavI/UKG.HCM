@@ -36,7 +36,6 @@ public class CreatePersonTests : UITestsBase
 
         createButton.Click();
 
-        // Wait for redirection to Details page
         Wait.Until(d => d.Url.Contains("/People/Details"));
 
         Assert.That(Driver.Url, Does.Contain("/People/Details"), "Did not redirect to Details page after creation.");
@@ -91,7 +90,6 @@ public class CreatePersonTests : UITestsBase
         LoginAsEmployee();
         Driver.Navigate().GoToUrl(CreatePageUrl);
 
-        // Expect to either be redirected or see access denied
         bool accessDenied = Wait.Until(d =>
             d.Url.Contains("/AccessDenied"));
 

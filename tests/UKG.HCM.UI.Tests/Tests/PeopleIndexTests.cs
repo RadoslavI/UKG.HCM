@@ -85,7 +85,6 @@ public class PeopleIndexTests : UITestsBase
     [Test]
     public void EmployeeSeesOnlyTheirOwnRecord()
     {
-        // Log in as a seeded employee and verify only their row appears
         Logout();
         LoginAsEmployee();
         Driver.Navigate().GoToUrl(PeopleIndexUrl);

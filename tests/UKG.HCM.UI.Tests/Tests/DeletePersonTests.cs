@@ -25,7 +25,6 @@ public class DeletePersonTests : UITestsBase
         Wait.Until(d => d.Url.Contains("/People"));
         Assert.That(Driver.Url, Does.Contain("/People"));
 
-        // Optionally check if person is no longer in the list
         var pageSource = Driver.PageSource;
         Assert.IsFalse(pageSource.Contains(_personId.ToString()), "Deleted person still appears in list.");
     }

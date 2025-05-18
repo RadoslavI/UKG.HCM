@@ -63,17 +63,14 @@ namespace UKG.HCM.UI.Tests.Tests
         [Test]
         public void Logout_ShouldRedirectToHomeAndShowLoginLink()
         {
-            // Login first
             LoginAsAdmin();
 
-            // Open user dropdown and click logout
             var userDropdown = Driver.FindElement(By.Id("userDropdown"));
             userDropdown.Click();
 
             var logoutLink = Wait.Until(d => d.FindElement(By.CssSelector("a.dropdown-item[href='/Auth/Logout']")));
             logoutLink.Click();
 
-            // Wait for redirect to home or index page
             Wait.Until(d => d.Url == $"{BaseUrl}/" || d.Url == $"{BaseUrl}/Index");
 
             var loginLink = Driver.FindElement(By.LinkText("Login"));
@@ -86,10 +83,8 @@ namespace UKG.HCM.UI.Tests.Tests
         [Test]
         public void AccessProtectedPageAfterLogout_ShouldRedirectToLogin()
         {
-            // Login first
             LoginAsAdmin();
 
-            // Logout
             var userDropdown = Driver.FindElement(By.Id("userDropdown"));
             userDropdown.Click();
             var logoutLink = Wait.Until(d => d.FindElement(By.CssSelector("a.dropdown-item[href='/Auth/Logout']")));
@@ -97,7 +92,6 @@ namespace UKG.HCM.UI.Tests.Tests
 
             Wait.Until(d => d.Url == $"{BaseUrl}/" || d.Url == $"{BaseUrl}/Index");
 
-            // Try to access protected page after logout
             Driver.Navigate().GoToUrl($"{BaseUrl}/People/Index");
 
             Wait.Until(d => d.Url.Contains("/Auth/Login"));

@@ -43,9 +43,6 @@ public class ChangePasswordTests : UITestsBase
 
     private void ResetPasswordToAdminPassword()
     {
-        // Assuming you are still logged in and on the Change Password page
-
-        // Wait for the inputs to be ready (or refresh if needed)
         Wait.Until(d => d.FindElement(By.Id("PasswordRequest_CurrentPassword")));
 
         var currentPasswordInput = Driver.FindElement(By.Id("PasswordRequest_CurrentPassword"));
@@ -54,9 +51,9 @@ public class ChangePasswordTests : UITestsBase
         var changeButton = Driver.FindElement(By.CssSelector("button[type='submit']"));
 
         currentPasswordInput.Clear();
-        currentPasswordInput.SendKeys(NewPassword); // The current password is now the one you just set
+        currentPasswordInput.SendKeys(NewPassword);
         newPasswordInput.Clear();
-        newPasswordInput.SendKeys(AdminPassword); // Reset to original password
+        newPasswordInput.SendKeys(AdminPassword);
         confirmNewPasswordInput.Clear();
         confirmNewPasswordInput.SendKeys(AdminPassword);
 

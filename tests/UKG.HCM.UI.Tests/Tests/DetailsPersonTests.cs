@@ -45,13 +45,11 @@ public class DetailsPersonTests : UITestsBase
     [Test]
     public void Details_AsOtherEmployee_ShouldBeForbidden()
     {
-        // Create another user
         Logout();
-        LoginAsEmployee(); // This user must not match _personEmail
+        LoginAsEmployee();
 
         Driver.Navigate().GoToUrl($"{BaseUrl}/People/Details/{_personId}");
 
-        // Forbidden is returned as 403 HTML page or redirect to access denied page depending on config
         Assert.That(Driver.PageSource, Does.Contain("AccessDenied").IgnoreCase
                     .Or.Contain("403").IgnoreCase
                     .Or.Contain("forbidden").IgnoreCase);
