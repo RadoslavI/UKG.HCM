@@ -61,7 +61,7 @@ public class AuthService : IAuthService
     {
         try
         {
-            var url = $"{_configuration["AuthenticationApi:DeleteEndpoint"]}?email={Uri.EscapeDataString(email)}";
+            var url = $"{_configuration["AuthenticationApi:DeleteEndpoint"]}/{Uri.EscapeDataString(email)}";
             var response = await _httpClient.DeleteAsync(url);
 
             if (!response.IsSuccessStatusCode)

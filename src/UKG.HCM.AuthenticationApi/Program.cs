@@ -125,7 +125,9 @@ public class Program
         // Configure HTTP pipeline
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
+            app.UseSwagger(c => {
+                c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
+            });
             app.UseSwaggerUI();
         }
 
