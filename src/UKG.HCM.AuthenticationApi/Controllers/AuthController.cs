@@ -14,7 +14,7 @@ namespace UKG.HCM.AuthenticationApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
-    [HttpGet("login")]
+    [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] IncomingLoginUserDto login)
     {

@@ -11,6 +11,7 @@ using UKG.HCM.PeopleManagementApi.Services;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 using UKG.HCM.PeopleManagementApi.Tests.Mocks;
 using UKG.HCM.Shared.Constants;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Tests.Services;
 
@@ -31,9 +32,9 @@ public class PeopleServiceTests
         
         // Set default behavior for auth service to prevent exceptions
         _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
         _mockAuthService.Setup(a => a.DeleteUserAsync(It.IsAny<string>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
             
         _service = new PeopleService(_context, _mockAuthService.Object, _mockLogger.Object);
     }
@@ -101,9 +102,9 @@ public class PeopleServiceTests
         );
         
         // Setup auth service to return success for this create operation
-        _mockAuthService
-            .Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
-            .ReturnsAsync(true);
+        // _mockAuthService
+        //     .Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
+        //     .ReturnsAsync(new OperationResult(true));
         
         // Act
         var result = await _service.CreatePersonAsync(dto);
@@ -136,7 +137,7 @@ public class PeopleServiceTests
         var result = await _service.UpdatePersonAsync(existingPerson.Id, updateDto);
         
         // Assert
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         
         var updatedPerson = await _context.People.FindAsync(existingPerson.Id);
         Assert.That(updatedPerson, Is.Not.Null);
@@ -163,7 +164,7 @@ public class PeopleServiceTests
         var result = await _service.UpdatePersonAsync(Guid.NewGuid(), updateDto);
         
         // Assert
-        Assert.That(result, Is.False);
+        Assert.That(result.Success, Is.False);
     }
     
     [Test]
@@ -175,13 +176,13 @@ public class PeopleServiceTests
         
         // Setup auth service to return success for the delete operation
         _mockAuthService.Setup(a => a.DeleteUserAsync(existingPerson.Email))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
         
         // Act
         var result = await _service.DeletePersonAsync(existingPerson.Id);
         
         // Assert
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         
         var deletedPerson = await _context.People.FindAsync(existingPerson.Id);
         Assert.That(deletedPerson, Is.Null);
@@ -200,6 +201,6 @@ public class PeopleServiceTests
         var result = await _service.DeletePersonAsync(Guid.NewGuid());
         
         // Assert
-        Assert.That(result, Is.False);
+        Assert.That(result.Success, Is.False);
     }
 }

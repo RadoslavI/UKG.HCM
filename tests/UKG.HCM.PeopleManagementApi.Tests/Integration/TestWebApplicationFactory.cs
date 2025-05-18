@@ -12,6 +12,7 @@ using UKG.HCM.PeopleManagementApi.Data;
 using UKG.HCM.PeopleManagementApi.DTOs.AuthAPI;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 using Moq;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Tests.Integration;
 
@@ -24,9 +25,9 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
     {
         // Setup default behavior for auth service
         _mockAuthService.Setup(a => a.CreateUserAsync(It.IsAny<UserDto>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
         _mockAuthService.Setup(a => a.DeleteUserAsync(It.IsAny<string>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

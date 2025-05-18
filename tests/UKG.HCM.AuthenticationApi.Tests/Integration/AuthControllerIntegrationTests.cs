@@ -90,7 +90,7 @@ namespace UKG.HCM.AuthenticationApi.Tests.Integration
                 CurrentPassword: "OldPassword",
                 NewPassword: "NewPass123!");
 
-            var response = await _client.PostAsJsonAsync("/api/auth/change-password", changePasswordDto);
+            var response = await _client.PatchAsJsonAsync("/api/auth/change-password", changePasswordDto);
             response.EnsureSuccessStatusCode();
 
             var userServiceMock = _factory.GetUserServiceMock();

@@ -58,7 +58,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
                 Role = "Admin"
             });
 
-            Assert.IsTrue(result);
+            Assert.IsTrue(result.Success);
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
                 Role = "Admin"
             });
 
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.Success);
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
                 Role = "Admin"
             });
 
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.Success);
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
 
             var result = await service.DeleteUserAsync("test@example.com");
 
-            Assert.IsTrue(result);
+            Assert.IsTrue(result.Success);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
 
             var result = await service.DeleteUserAsync("test@example.com");
 
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.Success);
         }
 
         [Test]
@@ -135,7 +135,7 @@ namespace UKG.HCM.PeopleManagementApi.Tests.Services
 
             var result = await service.DeleteUserAsync("test@example.com");
 
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.Success);
         }
     }
 }

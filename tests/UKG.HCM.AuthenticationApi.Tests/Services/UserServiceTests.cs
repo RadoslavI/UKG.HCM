@@ -46,7 +46,7 @@ public class UserServiceTests
 
         var result = await _service.CreateUserAsync(dto);
 
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         var savedUser = await _context.Users.FirstOrDefaultAsync(p => p.Email == dto.Email);
         Assert.That(savedUser, Is.Not.Null);
         Assert.That(savedUser.FullName, Is.EqualTo(dto.FullName));
@@ -77,7 +77,7 @@ public class UserServiceTests
 
         var result = await _service.CreateUserAsync(dto);
 
-        Assert.That(result, Is.False);
+        Assert.That(result.Success, Is.False);
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class UserServiceTests
 
         var result = await _service.DeleteUserAsync(existingUser.Email);
 
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         var deletedUser = await _context.Users.FindAsync(existingUser.Id);
         Assert.That(deletedUser, Is.Null);
     }
@@ -100,7 +100,7 @@ public class UserServiceTests
 
         var result = await _service.DeleteUserAsync("notfound@example.com");
 
-        Assert.That(result, Is.False);
+        Assert.That(result.Success, Is.False);
     }
 
     [Test]
@@ -156,7 +156,7 @@ public class UserServiceTests
 
         var result = await _service.ChangePasswordAsync(email, currentPassword, newPassword);
 
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
 
         var updatedUser = await _context.Users.FirstAsync(u => u.Email == email);
         Assert.That(updatedUser.PasswordHash, Is.EqualTo(PasswordHasher.HashPassword(newPassword)));
@@ -168,6 +168,6 @@ public class UserServiceTests
         var email = "nonexistent@example.com";
         var result = await _service.ChangePasswordAsync(email, "wrongpass", "newpass");
 
-        Assert.That(result, Is.False);
+        Assert.That(result.Success, Is.False);
     }
 }

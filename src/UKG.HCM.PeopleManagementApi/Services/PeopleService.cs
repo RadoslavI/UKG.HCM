@@ -43,7 +43,7 @@ public class PeopleService : IPeopleService
         return new OutgoingGetPersonDTO(person.Id, person.FirstName, person.LastName, person.Email, RoleTransformations.FromEnumToString(person.Role), person.HireDate);
     }
 
-    public async Task<Guid?> CreatePersonAsync(IncomingCreatePersonDTO incoming)
+    public async Task<Guid> CreatePersonAsync(IncomingCreatePersonDTO incoming)
     {
         var person = new Person
         {
@@ -64,11 +64,11 @@ public class PeopleService : IPeopleService
             Role = person.Role.ToString()
         };
 
-        var result = await _authService.UpdateUserAsync(userDto);
+        var result = await _authService.CreateUserAsync(userDto);
         if (!result.Success)
         {
             _logger.LogWarning("User creation in Auth API failed for {Email}", person.Email);
-            return null;
+            return Guid.Empty;
         }
         
         _logger.LogInformation("Person updated: {email}", person.Email);

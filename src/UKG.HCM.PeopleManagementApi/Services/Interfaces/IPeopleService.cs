@@ -9,7 +9,7 @@ public interface IPeopleService
 {
     Task<IEnumerable<OutgoingGetPersonDTO>> GetPeopleAsync();
     Task<OutgoingGetPersonDTO?> GetPersonByIdAsync(Guid id);
-    Task<Guid?> CreatePersonAsync(IncomingCreatePersonDTO incoming);
+    Task<Guid> CreatePersonAsync(IncomingCreatePersonDTO incoming);
     Task<OperationResult> UpdatePersonAsync(Guid id, IncomingUpdatePersonDTO updatedPerson);
     Task<OperationResult> DeletePersonAsync(Guid id);
 }

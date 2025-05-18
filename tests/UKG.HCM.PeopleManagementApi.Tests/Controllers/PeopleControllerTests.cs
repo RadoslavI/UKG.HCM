@@ -7,6 +7,7 @@ using UKG.HCM.PeopleManagementApi.DTOs.Person.Get;
 using UKG.HCM.PeopleManagementApi.DTOs.Person.Update;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 using UKG.HCM.Shared.Constants;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.PeopleManagementApi.Tests.Controllers;
 
@@ -143,7 +144,7 @@ public class PeopleControllerTests
         // Use It.IsAny for object comparison
         _mockPeopleService
             .Setup(s => s.UpdatePersonAsync(personId, It.IsAny<IncomingUpdatePersonDTO>()))
-            .ReturnsAsync(true);
+            .ReturnsAsync(OperationResult.SuccessResult);
     
         // Act
         var result = await _controller.UpdatePerson(personId, updateDto);
@@ -170,7 +171,7 @@ public class PeopleControllerTests
         // Use It.IsAny for object comparison
         _mockPeopleService
             .Setup(s => s.UpdatePersonAsync(nonExistentId, It.IsAny<IncomingUpdatePersonDTO>()))
-            .ReturnsAsync(false);
+            .ReturnsAsync(OperationResult.FailureResult());
 
         // Act
         var result = await _controller.UpdatePerson(nonExistentId, updateDto);
@@ -187,7 +188,7 @@ public class PeopleControllerTests
     {
         // Arrange
         var personId = Guid.NewGuid();
-        _mockPeopleService.Setup(s => s.DeletePersonAsync(personId)).ReturnsAsync(true);
+        _mockPeopleService.Setup(s => s.DeletePersonAsync(personId)).ReturnsAsync(OperationResult.SuccessResult);
 
         // Act
         var result = await _controller.DeletePerson(personId);
@@ -204,7 +205,7 @@ public class PeopleControllerTests
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        _mockPeopleService.Setup(s => s.DeletePersonAsync(nonExistentId)).ReturnsAsync(false);
+        _mockPeopleService.Setup(s => s.DeletePersonAsync(nonExistentId)).ReturnsAsync(OperationResult.FailureResult());
 
         // Act
         var result = await _controller.DeletePerson(nonExistentId);

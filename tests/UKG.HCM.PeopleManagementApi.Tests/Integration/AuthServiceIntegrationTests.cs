@@ -76,7 +76,7 @@ public class AuthServiceIntegrationTests
         var result = await _authService.CreateUserAsync(userDto);
 
         // Assert
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         
         // Verify HTTP request was made correctly
         _mockHttpMessageHandler.Protected().Verify(
@@ -96,7 +96,7 @@ public class AuthServiceIntegrationTests
         var result = await _authService.DeleteUserAsync(email);
 
         // Assert
-        Assert.That(result, Is.True);
+        Assert.That(result.Success, Is.True);
         
         // Verify HTTP request was made correctly
         _mockHttpMessageHandler.Protected().Verify(
