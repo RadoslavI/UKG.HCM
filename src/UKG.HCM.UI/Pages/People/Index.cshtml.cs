@@ -29,8 +29,7 @@ public class IndexModel : PageModel
     {
         try
         {
-            if (User.IsInRole(UKG.HCM.Shared.Constants.ApplicationRoles.HRAdmin) || 
-                User.IsInRole(UKG.HCM.Shared.Constants.ApplicationRoles.Manager))
+            if (User.IsManagerOrAbove())
             {
                 // Admins and Managers can see all people
                 People = await _peopleService.GetPeopleAsync();

@@ -3,16 +3,16 @@ using UKG.HCM.AuthenticationApi.Data;
 using UKG.HCM.AuthenticationApi.Data.Entities;
 using UKG.HCM.AuthenticationApi.DTOs.CreateUser;
 using UKG.HCM.AuthenticationApi.Services.Interfaces;
-using UKG.HCM.AuthenticationApi.Utilities;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.AuthenticationApi.Services;
 
 public class UserService : IUserService
 {
     private readonly AuthContext _context;
-    private readonly ILogger _logger;
+    private readonly ILogger<UserService> _logger;
     
-    public UserService(AuthContext context, ILogger logger)
+    public UserService(AuthContext context, ILogger<UserService> logger)
     {
         _context = context;
         _logger = logger;

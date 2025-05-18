@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace UKG.HCM.AuthenticationApi.Utilities;
+namespace UKG.HCM.Shared.Utilities;
 
 /// <summary>
 /// Utility class for hashing passwords securely using SHA256

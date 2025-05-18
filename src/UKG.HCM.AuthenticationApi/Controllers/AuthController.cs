@@ -14,6 +14,7 @@ namespace UKG.HCM.AuthenticationApi.Controllers;
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] IncomingLoginUserDto login)
     {
         var user = await userService.ValidateUserAsync(login.Email, login.Password);

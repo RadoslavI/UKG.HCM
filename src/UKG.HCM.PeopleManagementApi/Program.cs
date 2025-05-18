@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UKG.HCM.PeopleManagementApi.Data;
 using FluentValidation.AspNetCore;
+using UKG.HCM.PeopleManagementApi.Handlers;
 using UKG.HCM.PeopleManagementApi.Services;
 using UKG.HCM.PeopleManagementApi.Services.Interfaces;
 using UKG.HCM.Shared.Configuration;
@@ -60,7 +61,11 @@ public class Program
 
         // Application services
         builder.Services.AddScoped<IPeopleService, PeopleService>();
-        builder.Services.AddHttpClient<IAuthService, AuthService>();
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddTransient<ForwardingHttpClientHandler>();
+
+        builder.Services.AddHttpClient<IAuthService, AuthService>()
+            .AddHttpMessageHandler<ForwardingHttpClientHandler>();
 
         // Validation
         builder.Services.AddFluentValidationAutoValidation();

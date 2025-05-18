@@ -197,6 +197,4 @@ public class PeopleService : IPeopleService
                 new AuthenticationHeaderValue("Bearer", _tokenStore.Token);
         }
     }
-    
-    // The Authorization header will be added by the HttpClientAuthorizationDelegatingHandler
 }

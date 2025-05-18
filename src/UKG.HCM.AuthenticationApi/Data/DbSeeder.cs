@@ -1,6 +1,6 @@
 using UKG.HCM.AuthenticationApi.Data.Entities;
-using UKG.HCM.AuthenticationApi.Utilities;
 using UKG.HCM.Shared.Constants;
+using UKG.HCM.Shared.Utilities;
 
 namespace UKG.HCM.AuthenticationApi.Data;
 
