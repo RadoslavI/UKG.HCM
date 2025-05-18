@@ -5,7 +5,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests;
 
 [TestFixture]
-public class CreatePersonTests : AuthTestBase
+public class CreatePersonTests : UITestsBase
 {
     private const string CreatePageUrl = $"{BaseUrl}/People/Create";
 

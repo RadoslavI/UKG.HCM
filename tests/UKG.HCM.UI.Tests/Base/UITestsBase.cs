@@ -4,7 +4,7 @@ using OpenQA.Selenium.Support.UI;
 
 namespace UKG.HCM.UI.Tests.Base;
 
-public abstract class AuthTestBase
+public abstract class UITestsBase
 {
     protected IWebDriver Driver;
     protected WebDriverWait Wait;

@@ -4,7 +4,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests;
 
 [TestFixture]
-public class PeopleIndexTests : AuthTestBase
+public class PeopleIndexTests : UITestsBase
 {
     private const string PeopleIndexUrl = $"{BaseUrl}/People/Index";
 

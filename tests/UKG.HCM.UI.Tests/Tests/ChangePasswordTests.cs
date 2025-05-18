@@ -4,7 +4,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests;
 
 [TestFixture]
-public class ChangePasswordTests : AuthTestBase
+public class ChangePasswordTests : UITestsBase
 {
     private const string ChangePasswordUrl = $"{BaseUrl}/Auth/ChangePassword";
     private const string NewPassword = "NewStrongPassword@123";

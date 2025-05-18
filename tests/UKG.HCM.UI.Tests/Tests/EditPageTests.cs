@@ -5,7 +5,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests;
 
 [TestFixture]
-public class EditPageTests : AuthTestBase
+public class EditPageTests : UITestsBase
 {
     private Guid _personId;
     private string _personEmail;

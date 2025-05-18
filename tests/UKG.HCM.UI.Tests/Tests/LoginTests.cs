@@ -4,7 +4,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests
 {
     [TestFixture]
-    public class LoginTests : AuthTestBase
+    public class LoginTests : UITestsBase
     {
         [Test]
         public void Login_WithValidCredentials_ShouldRedirectToHomeAndShowPeopleLink()

@@ -4,7 +4,7 @@ using UKG.HCM.UI.Tests.Base;
 namespace UKG.HCM.UI.Tests.Tests;
 
 [TestFixture]
-public class DeletePersonTests : AuthTestBase
+public class DeletePersonTests : UITestsBase
 {
     private Guid _personId;
 
