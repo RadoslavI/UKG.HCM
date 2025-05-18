@@ -107,7 +107,7 @@ public class AuthService : IAuthService
                 NewPassword = newPassword
             };
 
-            var response = await _httpClient.PostAsJsonAsync(changePasswordEndpoint, request);
+            var response = await _httpClient.PatchAsJsonAsync(changePasswordEndpoint, request);
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
