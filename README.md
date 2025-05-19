@@ -30,6 +30,7 @@ A .NET 8+ backend solution developed for the UKG BE HCM assignment. The project 
 - Razor Pages (for optional UI)
 - InMemory database (for local development/testing)
 - NUnit (testing)
+- Selenium (automation UI testing)
 - Dependency Injection
 - Minimal API configuration
 - Clean architecture practices
@@ -96,7 +97,7 @@ UKG.HCM/
 │   ├── AuthenticationApi.Tests/
 │   ├── PeopleManagementApi.Tests/
 │   ├── Ui.Tests/
-
+│
 └── README.md
 ```
 
