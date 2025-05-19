@@ -21,7 +21,7 @@ A .NET 8+ backend solution developed for the UKG BE HCM assignment. The project 
     - `Auth.API`: Handles login and user management
 
 - **Testing**  
-  - Unit tests and integration tests implemented
+  - Unit tests, integration and Selenium tests implemented
 
 ## 🏗️ Technologies Used
 
@@ -93,9 +93,10 @@ UKG.HCM/
 │   ├── UI/              # Optional Razor Pages UI
 │
 ├── tests/
-│   ├── Auth.Tests/
-│   ├── People.Tests/
-│
+│   ├── AuthenticationApi.Tests/
+│   ├── PeopleManagementApi.Tests/
+│   ├── Ui.Tests/
+
 └── README.md
 ```
 
